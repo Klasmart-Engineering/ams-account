@@ -37,7 +37,7 @@ COPY configs configs
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 # Bind the app port
-EXPOSE 8088
+EXPOSE 8089
 
 # Start the app
 ENTRYPOINT [ "bin/handler" ]
