@@ -1,0 +1,4 @@
+{
+    "region": "ap-northeast-2",
+    "queueName": "sqs-email-to-send-beta"
+}
