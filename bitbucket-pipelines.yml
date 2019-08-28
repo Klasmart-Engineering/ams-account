@@ -1,0 +1,22 @@
+image: golang
+
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          caches:
+            - gopath
+            - gomodules
+          script:
+            - git config --global url."ssh://git@bitbucket.org".insteadOf "https://bitbucket.org"
+            - go get ./...
+            - go build ./...
+            - go build -tags lambda ./...
+            - go vet ./...
+            - go get github.com/calmisland/go-junit-report
+            - mkdir ./test-reports
+            - go test -v ./src/... 2>&1 | go-junit-report -set-exit-code > ./test-reports/junit.xml
+definitions:
+  caches:
+    gopath: ${GOPATH}/src
+    gomodules: ${GOPATH}/pkg/mod
