@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
-	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 )
 
 var (
@@ -19,6 +20,14 @@ func initLambdaFunctions() {
 func createLambdaRouterV1() *apirouter.Router {
 	router := apirouter.NewRouter()
 	router.AddMiddleware(authmiddlewares.ValidateSession(globals.AccessTokenValidator, true))
+
+	accountRouter := apirouter.NewRouter()
+	router.AddRouter("account", accountRouter)
+
+	selfAccountRouter := apirouter.NewRouter()
+	selfAccountRouter.AddMethodHandler("GET", "info", handlers.HandleGetSelfAccountInfo)
+	selfAccountRouter.AddMethodHandler("POST", "info", handlers.HandleEditSelfAccountInfo)
+	accountRouter.AddRouter("self", selfAccountRouter)
 
 	return router
 }
