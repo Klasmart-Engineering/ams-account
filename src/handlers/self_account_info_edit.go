@@ -27,7 +27,7 @@ const (
 	maxPartNameLength = 32
 )
 
-// HandleEditSelfAccountInfo handles retreiving the signed in account information requests.
+// HandleEditSelfAccountInfo handles requests for editing account information for the signed in account.
 func HandleEditSelfAccountInfo(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody editSelfAccountInfoRequestBody
