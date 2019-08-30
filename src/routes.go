@@ -18,13 +18,29 @@ func initLambdaFunctions() {
 }
 
 func createLambdaRouterV1() *apirouter.Router {
+	requireAuthMiddleware := authmiddlewares.ValidateSession(globals.AccessTokenValidator, true)
 	router := apirouter.NewRouter()
-	router.AddMiddleware(authmiddlewares.ValidateSession(globals.AccessTokenValidator, true))
+	router.AddMethodHandler("GET", "serverinfo", handlers.HandleServerInfo)
 
 	accountRouter := apirouter.NewRouter()
+	accountRouter.AddMethodHandler("POST", "forgotpassword", handlers.HandleForgotPassword)
+	accountRouter.AddMethodHandler("POST", "restorepassword", handlers.HandleRestorePassword)
+	accountRouter.AddMethodHandler("POST", "signup", handlers.HandleSignUp)
 	router.AddRouter("account", accountRouter)
 
+	accountResendRouter := apirouter.NewRouter()
+	accountRouter.AddRouter("resend", accountResendRouter)
+
+	accountResendVerifyRouter := apirouter.NewRouter()
+	accountResendRouter.AddMethodHandler("POST", "email", handlers.HandleResendEmailVerification)
+	accountResendRouter.AddRouter("verification", accountResendVerifyRouter)
+
+	accountVerifyRouter := apirouter.NewRouter()
+	accountVerifyRouter.AddMethodHandler("POST", "email", handlers.HandleVerifyEmail)
+	accountRouter.AddRouter("verify", accountVerifyRouter)
+
 	selfAccountRouter := apirouter.NewRouter()
+	selfAccountRouter.AddMiddleware(requireAuthMiddleware)
 	selfAccountRouter.AddMethodHandler("GET", "info", handlers.HandleGetSelfAccountInfo)
 	selfAccountRouter.AddMethodHandler("POST", "info", handlers.HandleEditSelfAccountInfo)
 	accountRouter.AddRouter("self", selfAccountRouter)

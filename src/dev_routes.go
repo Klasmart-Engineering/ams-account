@@ -23,12 +23,12 @@ func createTablesRequest(ctx context.Context, req *apirequests.Request, resp *ap
 	}
 
 	// Get the database
-	db, err := accountdatabase.GetDatabase()
+	accountDB, err := accountdatabase.GetDatabase()
 	if err != nil {
 		return resp.SetServerError(err)
 	}
 
-	err = db.CreateDatabaseTables()
+	err = accountDB.CreateDatabaseTables()
 	if err != nil {
 		return resp.SetServerError(err)
 	}
