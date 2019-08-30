@@ -3,16 +3,18 @@
 package server
 
 import (
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
 	"bitbucket.org/calmisland/go-server-aws/awsdynamodb"
 	"bitbucket.org/calmisland/go-server-aws/awssqs"
-	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
 	"bitbucket.org/calmisland/go-server-configs/configs"
+	"bitbucket.org/calmisland/go-server-emails/emailqueue"
+	"bitbucket.org/calmisland/go-server-geoip/geoip"
+	"bitbucket.org/calmisland/go-server-geoip/services/maxmind"
 	"bitbucket.org/calmisland/go-server-logs/errorreporter"
 	"bitbucket.org/calmisland/go-server-logs/errorreporter/slackreporter"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 )
 
 // Setup Setup
@@ -27,6 +29,7 @@ func Setup() {
 	setupPasswordPolicyValidator()
 	setupPasswordHasher()
 	setupEmailQueue()
+	setupGeoIP()
 	setupSlackReporter()
 
 	globals.Verify()
@@ -88,6 +91,14 @@ func setupEmailQueue() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func setupGeoIP() {
+	if err := maxmind.ActivateGeoIPService(); err != nil {
+		panic(err)
+	}
+
+	globals.GeoIPService = geoip.GetDefaultService()
 }
 
 func setupSlackReporter() {
