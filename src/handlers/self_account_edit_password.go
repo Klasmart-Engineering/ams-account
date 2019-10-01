@@ -57,9 +57,8 @@ func HandleEditSelfAccountPassword(ctx context.Context, req *apirequests.Request
 		return resp.SetClientError(apierrors.ErrorInvalidLogin)
 	}
 
-	// NOTE: If the account is marked to need a new password, we don't have to verify the old password
-	needsNewPassword := accounts.AccountMustSetPassword(accInfo.Flags)
-	if !needsNewPassword && !globals.PasswordHasher.VerifyPasswordHash(currentPassword, accInfo.PasswordHash) { // Verifies the password
+	// Verify that the current password is correct
+	if !globals.PasswordHasher.VerifyPasswordHash(currentPassword, accInfo.PasswordHash) { // Verifies the password
 		log.Printf("[EDITACCOUNTPW] An edit password request for account [%s] with the incorrect current password from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidPassword)
 	}
@@ -82,7 +81,7 @@ func HandleEditSelfAccountPassword(ctx context.Context, req *apirequests.Request
 	log.Printf("[EDITACCOUNTPW] A successful edit account password request for account [%s]\n", accountID)
 
 	// Resets the flag that this account must set a new password
-	if needsNewPassword {
+	if accounts.AccountMustSetPassword(accInfo.Flags) {
 		err = accountDB.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
 		if err != nil {
 			return resp.SetServerError(err)
