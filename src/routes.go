@@ -44,6 +44,7 @@ func createLambdaRouterV1() *apirouter.Router {
 	selfAccountRouter.AddMethodHandler("GET", "info", handlers.HandleGetSelfAccountInfo)
 	selfAccountRouter.AddMethodHandler("POST", "info", handlers.HandleEditSelfAccountInfo)
 	selfAccountRouter.AddMethodHandler("POST", "password", handlers.HandleEditSelfAccountPassword)
+	selfAccountRouter.AddMethodHandler("GET", "download", handlers.HandleAvtarDownloadMock)
 	accountRouter.AddRouter("self", selfAccountRouter)
 
 	otherAccountRouter := apirouter.NewRouter()
