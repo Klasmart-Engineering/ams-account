@@ -7,8 +7,6 @@ import (
 
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
-	"github.com/calmisland/go-errors"
-	"github.com/google/uuid"
 )
 
 type avatarUploadRequestBody struct {
@@ -18,7 +16,6 @@ type avatarUploadRequestBody struct {
 }
 
 type avatarUploadResponseBody struct {
-	AttachmentID  string            `json:"attachmentId"`
 	UploadURL     string            `json:"uploadUrl"`
 	UploadMethod  string            `json:"uploadMethod"`
 	UploadHeaders map[string]string `json:"uploadHeaders,omitempty"`
@@ -33,8 +30,8 @@ const (
 	sha256HexLength   = sha256ByteLength * 2
 )
 
-// HandleAvatarUpload handles avtar upload requests.
-func HandleAvatarUpload(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+// HandleSelfAvatarUpload handles self avtar upload requests.
+func HandleSelfAvatarUpload(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	var reqBody avatarUploadRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {
@@ -63,16 +60,7 @@ func HandleAvatarUpload(ctx context.Context, req *apirequests.Request, resp *api
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("contentSha256"))
 	}
 
-	attachmentUUID, err := uuid.NewRandom()
-	if err != nil {
-		return resp.SetServerError(errors.Wrap(err, "Failed to generate an UUID"))
-	}
-
-	// Get the signed upload URL
-	attachmentID := attachmentUUID.String()
-
 	response := avatarUploadResponseBody{
-		AttachmentID:  attachmentID,
 		UploadURL:     "https://not.yet.badanamu.net/upload",
 		UploadMethod:  "POST",
 		UploadHeaders: nil,
