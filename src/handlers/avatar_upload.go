@@ -4,9 +4,13 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"time"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
+	"bitbucket.org/calmisland/go-server-utils/timeutils"
 )
 
 type avatarUploadRequestBody struct {
@@ -25,9 +29,12 @@ const (
 	contentLengthHeaderName = "Content-Length"
 	imageContentType        = "image/jpeg"
 
-	attachmentMaxSize = 1 * 1024 * 1024 // 1 MB
-	sha256ByteLength  = sha256.Size
-	sha256HexLength   = sha256ByteLength * 2
+	avatarMaxSize                 = 1 * 1024 * 1024 // 1 MB
+	avatarExpireDuration          = 24 * time.Hour
+	avatarUploadURLExpireDuration = 30 * time.Minute
+
+	sha256ByteLength = sha256.Size
+	sha256HexLength  = sha256ByteLength * 2
 )
 
 // HandleSelfAvatarUpload handles self avtar upload requests.
@@ -44,14 +51,16 @@ func HandleSelfAvatarUpload(ctx context.Context, req *apirequests.Request, resp 
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("contentSha256"))
 	} else if reqBody.ContentLength <= 0 {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("contentLength"))
-	} else if reqBody.ContentLength > attachmentMaxSize {
-		return resp.SetClientError(apierrors.ErrorInputTooLong.WithField("contentLength").WithValue(attachmentMaxSize))
+	} else if reqBody.ContentLength > avatarMaxSize {
+		return resp.SetClientError(apierrors.ErrorInputTooLong.WithField("contentLength").WithValue(avatarMaxSize))
 	}
 
 	// Validate the content type
 	if reqBody.ContentType != imageContentType {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("contentType"))
 	}
+
+	accountID := req.Session.Data.AccountID
 
 	// Validate the content hash
 	contentSHA256Str := reqBody.ContentSHA256
@@ -60,10 +69,28 @@ func HandleSelfAvatarUpload(ctx context.Context, req *apirequests.Request, resp 
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("contentSha256"))
 	}
 
+	// Get the avatar expiration time
+	avatarExpireTimeMs := timeutils.EpochMSNow().Add(avatarExpireDuration)
+	avatarExpireTime := avatarExpireTimeMs.Time()
+
+	// Get the upload URL expiration time
+	urlExpireTime := timeutils.EpochMSNow().Add(avatarUploadURLExpireDuration)
+
+	uploadURLResult, err := globals.AvatarStorage.GetAvatarFileUploadURL(accountID, &cloudstorage.GetFileUploadURLInput{
+		ContentLength:  &reqBody.ContentLength,
+		ContentType:    &reqBody.ContentType,
+		ContentExpires: &avatarExpireTime,
+		ContentSHA256:  contentSHA256,
+		Expires:        urlExpireTime.Time(),
+	})
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+
 	response := avatarUploadResponseBody{
-		UploadURL:     "https://not.yet.badanamu.net/upload",
-		UploadMethod:  "POST",
-		UploadHeaders: nil,
+		UploadURL:     uploadURLResult.URL,
+		UploadMethod:  uploadURLResult.Method,
+		UploadHeaders: uploadURLResult.Headers,
 	}
 	resp.SetBody(&response)
 	return nil
