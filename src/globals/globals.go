@@ -1,6 +1,7 @@
 package globals
 
 import (
+	"bitbucket.org/calmisland/go-server-account/avatar"
 	"bitbucket.org/calmisland/go-server-emails/emailqueue"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
@@ -22,6 +23,9 @@ var (
 
 	// GeoIPService is the Geo IP service.
 	GeoIPService geoip.Service
+
+	// AvatarStorage is store handle avatar image.
+	AvatarStorage avatar.Storage
 )
 
 // Verify verifies if all variables have been properly set.
@@ -42,5 +46,9 @@ func Verify() {
 
 	if GeoIPService == nil {
 		panic(errors.New("The Geo IP service has not been set"))
+	}
+
+	if AvatarStorage == nil {
+		panic(errors.New("The AvatarStorage has not been set"))
 	}
 }

@@ -5,7 +5,9 @@ package server
 import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
+	"bitbucket.org/calmisland/go-server-account/avatar"
 	"bitbucket.org/calmisland/go-server-aws/awsdynamodb"
+	"bitbucket.org/calmisland/go-server-aws/awss3"
 	"bitbucket.org/calmisland/go-server-aws/awssqs"
 	"bitbucket.org/calmisland/go-server-configs/configs"
 	"bitbucket.org/calmisland/go-server-emails/emailqueue"
@@ -30,6 +32,7 @@ func Setup() {
 	setupPasswordHasher()
 	setupEmailQueue()
 	setupGeoIP()
+	setupAvatarManager()
 	setupSlackReporter()
 
 	globals.Verify()
@@ -99,6 +102,30 @@ func setupGeoIP() {
 	}
 
 	globals.GeoIPService = geoip.GetDefaultService()
+}
+
+func setupAvatarManager() {
+	var managerConfig avatar.ManagerConfig
+	err := configs.LoadConfig("avatar_manager", &managerConfig, true)
+	if err != nil {
+		panic(err)
+	}
+
+	var storageConfig awss3.StorageConfig
+	err = configs.LoadConfig("avatar_storage_s3", &storageConfig, true)
+	if err != nil {
+		panic(err)
+	}
+
+	managerConfig.Storage, err = awss3.NewStorage(&storageConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	globals.AvatarStorage, err = avatar.NewManager(managerConfig)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func setupSlackReporter() {
