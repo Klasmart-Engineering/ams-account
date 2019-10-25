@@ -16,7 +16,7 @@ type otherAccountInfoResponseBody struct {
 }
 
 // HandleGetOtherAccountInfo handles retrieving the other account information requests.
-func HandleGetOtherAccountInfo(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleGetOtherAccountInfo(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	accountID, _ := req.GetPathParam("accountId")
 	if len(accountID) == 0 {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)

@@ -36,7 +36,7 @@ const (
 )
 
 // HandleSignUp handles sign-up requests.
-func HandleSignUp(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody signUpRequestBody
 	err := req.UnmarshalBody(&reqBody)

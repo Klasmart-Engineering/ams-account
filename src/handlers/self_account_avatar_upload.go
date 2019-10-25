@@ -38,7 +38,7 @@ const (
 )
 
 // HandleSelfAvatarUpload handles self avtar upload requests.
-func HandleSelfAvatarUpload(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleSelfAvatarUpload(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	var reqBody avatarUploadRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {

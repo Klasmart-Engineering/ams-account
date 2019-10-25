@@ -28,7 +28,7 @@ const (
 )
 
 // HandleEditSelfAccountInfo handles requests for editing account information for the signed in account.
-func HandleEditSelfAccountInfo(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleEditSelfAccountInfo(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody editSelfAccountInfoRequestBody
 	err := req.UnmarshalBody(&reqBody)

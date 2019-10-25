@@ -17,8 +17,7 @@ const (
 )
 
 // HandleOtherAccountAvatarDownload handles other account avatar download requests.
-func HandleOtherAccountAvatarDownload(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
-
+func HandleOtherAccountAvatarDownload(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	accountID, _ := req.GetPathParam("accountId")
 	if len(accountID) == 0 {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
