@@ -32,7 +32,7 @@ func Setup() {
 	setupPasswordHasher()
 	setupEmailQueue()
 	setupGeoIP()
-	setupAvatarManager()
+	setupAvatarStorage()
 	setupSlackReporter()
 
 	globals.Verify()
@@ -104,25 +104,25 @@ func setupGeoIP() {
 	globals.GeoIPService = geoip.GetDefaultService()
 }
 
-func setupAvatarManager() {
-	var managerConfig avatar.ManagerConfig
-	err := configs.LoadConfig("avatar_manager", &managerConfig, true)
+func setupAvatarStorage() {
+	var avatarStorageConfig avatar.StorageConfig
+	err := configs.LoadConfig("avatar_storage", &avatarStorageConfig, true)
 	if err != nil {
 		panic(err)
 	}
 
-	var storageConfig awss3.StorageConfig
-	err = configs.LoadConfig("avatar_storage_s3", &storageConfig, true)
+	var s3StorageConfig awss3.StorageConfig
+	err = configs.LoadConfig("avatar_storage_s3", &s3StorageConfig, true)
 	if err != nil {
 		panic(err)
 	}
 
-	managerConfig.Storage, err = awss3.NewStorage(&storageConfig)
+	avatarStorageConfig.Storage, err = awss3.NewStorage(&s3StorageConfig)
 	if err != nil {
 		panic(err)
 	}
 
-	globals.AvatarStorage, err = avatar.NewManager(managerConfig)
+	globals.AvatarStorage, err = avatar.NewStorage(avatarStorageConfig)
 	if err != nil {
 		panic(err)
 	}

@@ -10,8 +10,7 @@ import (
 )
 
 // HandleSelfAccountAvatarDownload handles self account avatar download requests.
-func HandleSelfAccountAvatarDownload(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
-
+func HandleSelfAccountAvatarDownload(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	accountID := req.Session.Data.AccountID
 
 	// Get the download URL expiration time

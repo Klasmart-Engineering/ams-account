@@ -20,7 +20,7 @@ type verifyEmailRequestBody struct {
 }
 
 // HandleVerifyEmail handles account email verification requests.
-func HandleVerifyEmail(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody verifyEmailRequestBody
 	err := req.UnmarshalBody(&reqBody)

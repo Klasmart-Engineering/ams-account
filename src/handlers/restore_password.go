@@ -23,7 +23,7 @@ type restorePasswordRequestBody struct {
 }
 
 // HandleRestorePassword handles password restore requests.
-func HandleRestorePassword(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody restorePasswordRequestBody
 	err := req.UnmarshalBody(&reqBody)

@@ -19,7 +19,7 @@ type resendEmailVerificationRequestBody struct {
 }
 
 // HandleResendEmailVerification handles requests for resending email verifications.
-func HandleResendEmailVerification(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody resendEmailVerificationRequestBody
 	err := req.UnmarshalBody(&reqBody)

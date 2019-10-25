@@ -24,7 +24,7 @@ type forgotPasswordRequestBody struct {
 }
 
 // HandleForgotPassword handles forgot password requests.
-func HandleForgotPassword(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody forgotPasswordRequestBody
 	err := req.UnmarshalBody(&reqBody)

@@ -13,7 +13,7 @@ type serverInfoResponseBody struct {
 }
 
 // HandleServerInfo handles server information requests.
-func HandleServerInfo(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleServerInfo(_ context.Context, _ *apirequests.Request, resp *apirequests.Response) error {
 	serverRegionName := serverinfo.GetRegionName()
 	serverStageName := serverinfo.GetStageName()
 	response := serverInfoResponseBody{

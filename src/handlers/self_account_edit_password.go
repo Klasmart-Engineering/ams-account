@@ -19,7 +19,7 @@ type editSelfAccountPasswordRequestBody struct {
 }
 
 // HandleEditSelfAccountPassword handles requests of editing the password of the signed in account.
-func HandleEditSelfAccountPassword(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
 	var reqBody editSelfAccountPasswordRequestBody
 	err := req.UnmarshalBody(&reqBody)

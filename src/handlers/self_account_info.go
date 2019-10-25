@@ -18,7 +18,7 @@ type selfAccountInfoResponseBody struct {
 }
 
 // HandleGetSelfAccountInfo handles retrieving the signed in account information requests.
-func HandleGetSelfAccountInfo(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleGetSelfAccountInfo(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Get the database
 	accountDB, err := accountdatabase.GetDatabase()
 	if err != nil {
