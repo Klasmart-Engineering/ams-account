@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
@@ -23,6 +24,18 @@ func HandleOtherAccountAvatarDownload(_ context.Context, req *apirequests.Reques
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
+	// Gets the If-Modified-Since header value, if there is one
+	ifNoETagMatch, _ := req.GetHeaderIfNoneMatch()
+
+	// Gets the If-Modified-Since header value, if there is one
+	var ifModifiedSinceTime *time.Time
+	ifModifiedSinceTimeValue, hasIfModifiedSince, err := req.GetHeaderIfModifiedSince()
+	if err != nil {
+		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("If-Modified-Since"))
+	} else if hasIfModifiedSince {
+		ifModifiedSinceTime = &ifModifiedSinceTimeValue
+	}
+
 	// Get the database
 	accountDB, err := accountdatabase.GetDatabase()
 	if err != nil {
@@ -40,13 +53,23 @@ func HandleOtherAccountAvatarDownload(_ context.Context, req *apirequests.Reques
 	// Get the download URL expiration time
 	urlExpireTime := timeutils.EpochMSNow().Add(avatarDownloadURLExpireDuration)
 
-	downloadURLResult, err := globals.AvatarStorage.GetAvatarFileDownloadURL(accountID, &cloudstorage.GetFileDownloadURLInput{
-		Expires: urlExpireTime.Time(),
+	downloadURLResult, err := globals.AvatarStorage.GetAvatarFileDownloadURL(accountID, &cloudstorage.GetFileDownloadURLUsingCacheInput{
+		IfNoETagMatch:   ifNoETagMatch,
+		IfModifiedSince: ifModifiedSinceTime,
+		DownloadInput: &cloudstorage.GetFileDownloadURLInput{
+			Expires: urlExpireTime.Time(),
+		},
 	})
 	if err != nil {
 		return resp.SetServerError(err)
 	}
 
-	resp.Redirect(downloadURLResult.URL)
+	// Skip the redirection if the client can use the cached version
+	if downloadURLResult.UseCachedVersion {
+		resp.SetStatus(http.StatusNotModified)
+		return nil
+	}
+
+	resp.Redirect(downloadURLResult.DownloadOutput.URL)
 	return nil
 }
