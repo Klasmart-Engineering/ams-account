@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
@@ -58,7 +58,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		isUsingEmail = true
 	} else if len(userPhoneNumber) > 0 {
 		if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
-			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
@@ -108,7 +108,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	}
 
 	if accInfo != nil {
-		log.Printf("[FORGETPW] A request to recover from a forgotten password received for existing account [%s] from IP [%s] with UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[FORGETPW] A request to recover from a forgotten password received for existing account [%s] from IP [%s] with UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 		verificationCodeByteCount := forgotPasswordRegularVerificationCodeByteLength
 		if accInfo.AdminRole > 0 {
@@ -149,14 +149,14 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		}
 	} else {
 		if isUsingEmail {
-			log.Printf("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			logger.LogFormat("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			err = sendForgotPasswordEmailNotFound(userEmail, userLanguage)
 			if err != nil {
 				return resp.SetServerError(err)
 			}
 		} else {
 			// NOTE: We don't send anything to unknown phone numbers
-			log.Printf("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			logger.LogFormat("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 		}
 	}
 

@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 )
@@ -59,7 +59,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 
 	// Verify that the current password is correct
 	if !globals.PasswordHasher.VerifyPasswordHash(currentPassword, accInfo.PasswordHash) { // Verifies the password
-		log.Printf("[EDITACCOUNTPW] An edit password request for account [%s] with the incorrect current password from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[EDITACCOUNTPW] An edit password request for account [%s] with the incorrect current password from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidPassword)
 	}
 
@@ -78,7 +78,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 		return resp.SetServerError(err)
 	}
 
-	log.Printf("[EDITACCOUNTPW] A successful edit account password request for account [%s]\n", accountID)
+	logger.LogFormat("[EDITACCOUNTPW] A successful edit account password request for account [%s]\n", accountID)
 
 	// Resets the flag that this account must set a new password
 	if accounts.AccountMustSetPassword(accInfo.Flags) {

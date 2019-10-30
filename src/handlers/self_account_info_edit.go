@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
@@ -84,6 +84,6 @@ func HandleEditSelfAccountInfo(_ context.Context, req *apirequests.Request, resp
 		return resp.SetServerError(err)
 	}
 
-	log.Printf("[EDITACCOUNTINFO] A successful edit account request for account [%s]\n", accountID)
+	logger.LogFormat("[EDITACCOUNTINFO] A successful edit account request for account [%s]\n", accountID)
 	return nil
 }

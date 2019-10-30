@@ -3,9 +3,10 @@
 package main
 
 import (
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/setup/globalsetup"
 	"bitbucket.org/calmisland/go-server-configs/configs"
 	"bitbucket.org/calmisland/go-server-requests/apiservers/httpserver"
-	"bitbucket.org/calmisland/account-lambda-funcs/src/server"
 )
 
 func main() {
@@ -13,10 +14,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.Setup()
 
-	initLambdaFunctions()
-	initLambdaDevFunctions()
+	globalsetup.Setup()
+	rootRouter := handlers.InitializeRoutes()
+	initLambdaDevFunctions(rootRouter)
 
 	restServer := &httpserver.Server{
 		ListenAddress: ":8089",

@@ -3,9 +3,10 @@
 package main
 
 import (
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/setup/globalsetup"
 	"bitbucket.org/calmisland/go-server-aws/awslambda"
 	"bitbucket.org/calmisland/go-server-configs/configs"
-	"bitbucket.org/calmisland/account-lambda-funcs/src/server"
 )
 
 func main() {
@@ -14,8 +15,8 @@ func main() {
 		panic(err)
 	}
 
-	server.Setup()
-	initLambdaFunctions()
+	globalsetup.Setup()
+	rootRouter := handlers.InitializeRoutes()
 
 	err = awslambda.StartAPIHandler(rootRouter)
 	if err != nil {

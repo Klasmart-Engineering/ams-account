@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -51,17 +51,17 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
-		log.Printf("[VERIFY] A verify email request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] A verify email request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	} else if accounts.IsAccountEmailVerified(verificationInfo.Flags) {
 		return resp.SetClientError(apierrors.ErrorAlreadyVerified)
 	}
 
 	if verificationInfo.VerificationCodes.Email == nil {
-		log.Printf("[VERIFY] An email verify request for account [%s] without pending email verification from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] An email verify request for account [%s] without pending email verification from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	} else if !securitycodes.ValidateSecurityCode(*verificationInfo.VerificationCodes.Email, verificationCode) {
-		log.Printf("[VERIFY] An email verify request for account [%s] with incorrect verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] An email verify request for account [%s] with incorrect verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
@@ -70,7 +70,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 		return resp.SetServerError(err)
 	}
 
-	log.Printf("[VERIFY] A successful email verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	logger.LogFormat("[VERIFY] A successful email verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	userEmail := verificationInfo.Email
 	userLanguage := verificationInfo.Language

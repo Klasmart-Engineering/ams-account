@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -57,7 +57,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {
-				log.Printf("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
+				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
 				return resp.SetClientError(apierrors.ErrorItemNotFound)
 			}
 
@@ -69,7 +69,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {
-				log.Printf("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
+				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
 				return resp.SetClientError(apierrors.ErrorItemNotFound)
 			}
 
@@ -83,10 +83,10 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil || verificationInfo.VerificationCodes.Password == nil {
-		log.Printf("[RESTOREPW] A restore password request for account [%s] without a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[RESTOREPW] A restore password request for account [%s] without a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorItemNotFound)
 	} else if !securitycodes.ValidateSecurityCode(*verificationInfo.VerificationCodes.Password, verificationCode) {
-		log.Printf("[RESTOREPW] A restore password request for account [%s] with incorrect password verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[RESTOREPW] A restore password request for account [%s] with incorrect password verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
@@ -96,7 +96,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		return handlePasswordValidatorError(resp, err)
 	}
 
-	log.Printf("[RESTOREPW] A successful restore password request for account [%s] using a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	logger.LogFormat("[RESTOREPW] A successful restore password request for account [%s] using a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	// Generate the password hash
 	extraSecure := (verificationInfo.AdminRole > 0)

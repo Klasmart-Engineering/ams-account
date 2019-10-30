@@ -11,13 +11,13 @@ import (
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
 )
 
-func initLambdaDevFunctions() {
+func initLambdaDevFunctions(rootRouter *apirouter.Router) {
 	devRouter := apirouter.NewRouter()
 	devRouter.AddMethodHandler("GET", "createtables", createTablesRequest)
 	rootRouter.AddRouter("dev", devRouter)
 }
 
-func createTablesRequest(ctx context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func createTablesRequest(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	if req.HTTPMethod != "GET" {
 		return resp.SetClientError(apierrors.ErrorBadRequestMethod)
 	}
