@@ -1,12 +1,52 @@
 {
-    "openapi":"3.0.2",
+    "openapi": "3.0.2",
     "info": {
-        "title":"Accounts API",
-        "version":"1.0"
+        "title": "Accounts API",
+        "version": "1.0",
+        "description": "The accounts management RESTful API service."
     },
     "servers": [
         {
-            "url":"https://api.badanamu.net/v1"
+            "url": "https://{region}.api.badanamu.net/v1",
+            "description": "The production API server.",
+            "variables": {
+                "region": {
+                    "default": "seoul",
+                    "description": "The server region.",
+                    "enum": [
+                        "seoul",
+                        "mumbai"
+                    ]
+                }
+            }
+        },
+        {
+            "url": "https://{region}-beta.api.badanamu.net/v1",
+            "description": "The beta staging API server.",
+            "variables": {
+                "region": {
+                    "default": "seoul",
+                    "description": "The server region.",
+                    "enum": [
+                        "seoul",
+                        "mumbai"
+                    ]
+                }
+            }
+        },
+        {
+            "url": "https://api.internal.badanamu.net/v1",
+            "description": "The in-house API server.",
+            "variables": {
+                "region": {
+                    "default": "seoul",
+                    "description": "The server region.",
+                    "enum": [
+                        "seoul",
+                        "mumbai"
+                    ]
+                }
+            }
         }
     ],
     "components": {
@@ -65,7 +105,7 @@
             }
         },
         "securitySchemes": {
-            "name": {
+            "bearerAuth": {
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "CIT"
@@ -85,6 +125,7 @@
                                 "properties": {
                                     "user": {
                                         "type": "string",
+                                        "format": "email",
                                         "description": "The email address.",
                                         "example": "email@example.com"
                                     },
@@ -95,6 +136,7 @@
                                     },
                                     "partnerId": {
                                         "type": "integer",
+                                        "format": "int32",
                                         "description": "The partner ID to use when signing up.",
                                         "example": 1,
                                         "deprecated": true
@@ -141,11 +183,13 @@
                                             },
                                             "pw": {
                                                 "type": "string",
+                                                "format": "password",
                                                 "description": "The new password.",
                                                 "example": "password"
                                             },
                                             "partnerId": {
                                                 "type": "integer",
+                                                "format": "int32",
                                                 "description": "The partner ID to use when signing up.",
                                                 "example": 1,
                                                 "deprecated": true
@@ -157,6 +201,7 @@
                                         "properties": {
                                             "accountEmail": {
                                                 "type": "string",
+                                                "format": "email",
                                                 "description": "The account email address.",
                                                 "example": "email@example.com"
                                             },
@@ -167,11 +212,13 @@
                                             },
                                             "pw": {
                                                 "type": "string",
+                                                "format": "password",
                                                 "description": "The new password.",
                                                 "example": "password"
                                             },
                                             "partnerId": {
                                                 "type": "integer",
+                                                "format": "int32",
                                                 "description": "The partner ID to use when signing up.",
                                                 "example": 1,
                                                 "deprecated": true
@@ -213,6 +260,7 @@
                                     },
                                     "pw": {
                                         "type": "string",
+                                        "format": "password",
                                         "description": "The password.",
                                         "example": "password"
                                     },
@@ -223,6 +271,7 @@
                                     },
                                     "partnerId": {
                                         "type": "integer",
+                                        "format": "int32",
                                         "description": "The partner ID to use when signing up.",
                                         "example": 1,
                                         "deprecated": true
@@ -358,6 +407,7 @@
                                         },
                                         "email": {
                                             "type": "string",
+                                            "format": "email",
                                             "description": "The email of the user.",
                                             "example": "user@example.com"
                                         },
@@ -382,7 +432,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "description": "Changes account information for the signed in user.",
@@ -438,7 +493,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/account/self/password": {
@@ -453,11 +513,13 @@
                                 "properties": {
                                     "currPass": {
                                         "type": "string",
+                                        "format": "password",
                                         "description": "The current password for the account.",
                                         "example": "oldpassword"
                                     },
                                     "newPass": {
                                         "type": "string",
+                                        "format": "password",
                                         "description": "The new password for the account.",
                                         "example": "newpassword"
                                     }
@@ -476,7 +538,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/account/self/avatar": {
@@ -492,7 +559,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "description": "Uploads a new avatar for the signed in user account.",
@@ -518,6 +590,7 @@
                                     },
                                     "contentLength": {
                                         "type": "integer",
+                                        "format": "int64",
                                         "description": "The length of the avatar image in bytes.",
                                         "example": 17175981
                                     }
@@ -562,7 +635,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "description": "Removes the current avatar for the signed in user account.",
@@ -576,7 +654,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/account/other/{accountId}/info": {
@@ -618,6 +701,7 @@
                                         },
                                         "email": {
                                             "type": "string",
+                                            "format": "email",
                                             "description": "The email of the user.",
                                             "example": "user@example.com"
                                         }
@@ -632,7 +716,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/account/other/{accountId}/avatar": {
@@ -659,7 +748,12 @@
                     "401": {
                         "$ref": "#/components/responses/401Unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     }
