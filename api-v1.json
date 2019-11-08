@@ -21,6 +21,20 @@
             }
         },
         {
+            "url": "https://{region}-test.api.badanamu.net/v1",
+            "description": "The test production API server.",
+            "variables": {
+                "region": {
+                    "default": "seoul",
+                    "description": "The server region.",
+                    "enum": [
+                        "seoul",
+                        "mumbai"
+                    ]
+                }
+            }
+        },
+        {
             "url": "https://{region}-beta.api.badanamu.net/v1",
             "description": "The beta staging API server.",
             "variables": {
@@ -36,17 +50,7 @@
         },
         {
             "url": "https://api.internal.badanamu.net/v1",
-            "description": "The in-house API server.",
-            "variables": {
-                "region": {
-                    "default": "seoul",
-                    "description": "The server region.",
-                    "enum": [
-                        "seoul",
-                        "mumbai"
-                    ]
-                }
-            }
+            "description": "The in-house API server."
         }
     ],
     "components": {
@@ -115,7 +119,10 @@
     "paths": {
         "/account/forgotpassword": {
             "post": {
+                "operationId": "forgotPassword",
+                "summary": "Forgot Password",
                 "description": "Requests to restore a forgotten password.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The forget password request information.",
                     "content": {
@@ -161,7 +168,10 @@
         },
         "/account/restorepassword": {
             "post": {
+                "operationId": "restoreForgottenPassword",
+                "summary": "Restore Forgotten Password",
                 "description": "Restores from a forgotten password, by providing a new password.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The restore password request information.",
                     "content": {
@@ -245,7 +255,10 @@
         },
         "/account/signup": {
             "post": {
+                "operationId": "signUp",
+                "summary": "Sign Up",
                 "description": "Signs up a new Badanamu account.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The sign-up request information.",
                     "content": {
@@ -310,7 +323,10 @@
         },
         "/account/resend/verification/email": {
             "post": {
+                "operationId": "resendEmailVerification",
+                "summary": "Resend Email Verification",
                 "description": "Resends an email verification email.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The resend email address verification request information.",
                     "content": {
@@ -343,7 +359,10 @@
         },
         "/account/verify/email": {
             "post": {
+                "operationId": "verifyEmail",
+                "summary": "Verify Email Address",
                 "description": "Verifies an email address.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The verify email address request information.",
                     "content": {
@@ -381,7 +400,10 @@
         },
         "/account/self/info": {
             "get": {
+                "operationId": "getAccountInfoSelf",
+                "summary": "Get Account Info (Self)",
                 "description": "Returns the account information about the signed in user.",
+                "tags": ["account"],
                 "responses": {
                     "200": {
                         "description": "Successfully returned the account information.",
@@ -440,7 +462,10 @@
                 ]
             },
             "post": {
+                "operationId": "editAccountInfoSelf",
+                "summary": "Edit Account Info (Self)",
                 "description": "Changes account information for the signed in user.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The change account information request information.",
                     "content": {
@@ -503,7 +528,10 @@
         },
         "/account/self/password": {
             "post": {
+                "operationId": "changePassword",
+                "summary": "Change Password",
                 "description": "Changes the password for the signed in user.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The change password request information.",
                     "content": {
@@ -548,7 +576,10 @@
         },
         "/account/self/avatar": {
             "get": {
+                "operationId": "downloadAvatarSelf",
+                "summary": "Download Avatar (Self)",
                 "description": "Returns the avatar for the signed in user account.",
+                "tags": ["account"],
                 "responses": {
                     "307": {
                         "description": "Successfully returned the account avatar using a redirection."
@@ -567,7 +598,10 @@
                 ]
             },
             "post": {
+                "operationId": "uploadAvatarSelf",
+                "summary": "Upload Avatar (Self)",
                 "description": "Uploads a new avatar for the signed in user account.",
+                "tags": ["account"],
                 "requestBody": {
                     "description": "The upload request information.",
                     "content": {
@@ -643,7 +677,10 @@
                 ]
             },
             "delete": {
+                "operationId": "removeAvatarSelf",
+                "summary": "Remove Avatar (Self)",
                 "description": "Removes the current avatar for the signed in user account.",
+                "tags": ["account"],
                 "responses": {
                     "200": {
                         "description": "Successfully removed the current avatar."
@@ -664,7 +701,10 @@
         },
         "/account/other/{accountId}/info": {
             "get": {
+                "operationId": "getAccountInfoOther",
+                "summary": "Get Account Info (Other)",
                 "description": "Returns the account information about a specific account.",
+                "tags": ["account"],
                 "parameters": [
                     {
                         "in": "path",
@@ -726,7 +766,10 @@
         },
         "/account/other/{accountId}/avatar": {
             "get": {
+                "operationId": "downloadAvatarOther",
+                "summary": "Download Avatar (Other)",
                 "description": "Returns the avatar for a specific account.",
+                "tags": ["account"],
                 "parameters": [
                     {
                         "in": "path",
