@@ -18,7 +18,7 @@ pipelines:
             - go-revive -config go-server-tools/linter/revive.toml -formatter friendly ./src/... || (($? == 2))
             - go get github.com/calmisland/go-junit-report
             - mkdir ./test-reports
-            - go test -v ./src/... 2>&1 | go-junit-report -set-exit-code > ./test-reports/junit.xml
+            - go test -v ./... 2>&1 | go-junit-report -set-exit-code > ./test-reports/junit.xml
 definitions:
   caches:
     gopath: ${GOPATH}/src
