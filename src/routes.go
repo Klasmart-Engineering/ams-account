@@ -32,7 +32,7 @@ func createLambdaRouterV1() *apirouter.Router {
 	accountRouter.AddRouter("resend", accountResendRouter)
 
 	accountResendVerifyRouter := apirouter.NewRouter()
-	accountResendRouter.AddMethodHandler("POST", "email", handlers.HandleResendEmailVerification)
+	accountResendVerifyRouter.AddMethodHandler("POST", "email", handlers.HandleResendEmailVerification)
 	accountResendRouter.AddRouter("verification", accountResendVerifyRouter)
 
 	accountVerifyRouter := apirouter.NewRouter()
