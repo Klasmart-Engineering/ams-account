@@ -68,6 +68,8 @@ func HandleOtherAccountAvatarDownload(_ context.Context, req *apirequests.Reques
 	if downloadURLResult.UseCachedVersion {
 		resp.SetStatus(http.StatusNotModified)
 		return nil
+	} else if downloadURLResult == nil {
+		return resp.SetClientError(apierrors.ErrorItemNotFound)
 	}
 
 	resp.Redirect(downloadURLResult.DownloadOutput.URL)
