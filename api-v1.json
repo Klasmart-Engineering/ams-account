@@ -387,7 +387,21 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successfully verified the email address."
+                        "description": "Successfully verified the email address.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["email"],
+                                    "properties": {
+                                        "email": {
+                                            "type": "string",
+                                            "description": "The email address of the verified account..",
+                                            "example": "email@example.com"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "$ref": "#/components/responses/400BadRequest"

@@ -124,9 +124,11 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		Language:       userLanguage,
 		TemplateName:   emailtemplates.EmailVerificationTemplate,
 		TemplateData: struct {
-			Code string
+			Code            string
+			VerificationURL string
 		}{
-			Code: verificationCode,
+			Code:            verificationCode,
+			VerificationURL: "http://localhost:8080/#/verify?accountId={accountID}&code={verificationCode}",
 		},
 	}
 	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
