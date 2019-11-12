@@ -6,7 +6,7 @@ require (
 	bitbucket.org/calmisland/go-server-account v1.7.0
 	bitbucket.org/calmisland/go-server-api v0.1.0
 	bitbucket.org/calmisland/go-server-auth v1.1.0
-	bitbucket.org/calmisland/go-server-aws v1.12.2
+	bitbucket.org/calmisland/go-server-aws v1.12.3
 	bitbucket.org/calmisland/go-server-cloud v0.4.0
 	bitbucket.org/calmisland/go-server-configs v1.1.0
 	bitbucket.org/calmisland/go-server-emails v1.0.2
