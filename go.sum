@@ -35,6 +35,8 @@ bitbucket.org/calmisland/go-server-logs v1.1.0 h1:JElPjo/6D1fQzuihWn4iYRZuPBt7GF
 bitbucket.org/calmisland/go-server-logs v1.1.0/go.mod h1:T4wgi9ni+3y3O2SaccCZ/fsXs9pgfDBzt0MGTnQwLfk=
 bitbucket.org/calmisland/go-server-logs v1.2.0 h1:u9ypBxRf7oxyLoPFfBZW+vymW44qqbyihEpUoeLrZ1o=
 bitbucket.org/calmisland/go-server-logs v1.2.0/go.mod h1:mUMqv4QAFdQ62ifv2X4ZhYB690Am7GFUfFxnMx0rKbg=
+bitbucket.org/calmisland/go-server-logs v1.2.1 h1:Xzagw9xdl0gjKmy8QCfpmyP0ousmAsG4Wi9kSkHUxwU=
+bitbucket.org/calmisland/go-server-logs v1.2.1/go.mod h1:mUMqv4QAFdQ62ifv2X4ZhYB690Am7GFUfFxnMx0rKbg=
 bitbucket.org/calmisland/go-server-queues v1.0.0 h1:zSted/hTfbziOwZYslF4fGz8F5965TA5wWLNwv8rOKw=
 bitbucket.org/calmisland/go-server-queues v1.0.0/go.mod h1:5Nf1TqYrkjgTEtk4TSWU0SS+TWY4rrDJDqz2vC4cYqs=
 bitbucket.org/calmisland/go-server-queues v1.0.1 h1:pekU2mv+yvEpojw4sgIz1ej1f3aP2NtZQybh3iOyzrk=
@@ -44,6 +46,8 @@ bitbucket.org/calmisland/go-server-requests v1.7.0 h1:lfLeeqplpnpm+usy4ZTeXEGyLh
 bitbucket.org/calmisland/go-server-requests v1.7.0/go.mod h1:ioWJ+oWhLuCe+gAvvhvZfYmiWCYnHv+Kkr9biOpBM6o=
 bitbucket.org/calmisland/go-server-requests v1.9.0 h1:HpGY4EP5i5Kt9NVJWt5V7u7e75NLN5QaCyJUwTJ5YDw=
 bitbucket.org/calmisland/go-server-requests v1.9.0/go.mod h1:MQs3nGA5TbhrXpb8n43AKpD5W11D/noH6GbVnz2w++o=
+bitbucket.org/calmisland/go-server-requests v1.9.1 h1:+R8denTO7ySNSXYUNKKvwNi8gd0iDegcdLF0JVoNbPQ=
+bitbucket.org/calmisland/go-server-requests v1.9.1/go.mod h1:S2W1oM0yaTXC9ls4TbP4B7eNKCIgPM0PNBuxKPLI8Sw=
 bitbucket.org/calmisland/go-server-security v1.0.1 h1:ZGnGa4JtO0T9UZxIrduo/oz2j1SFL9wEuM5f3OO8V80=
 bitbucket.org/calmisland/go-server-security v1.0.1/go.mod h1:KbuAvr4Q+pYM7HJjryIUTk4xsJ2rCBxb1jKz6+C75Wk=
 bitbucket.org/calmisland/go-server-utils v1.0.0/go.mod h1:5icb47nXPo2GH++D+2DSYnzPIZrlQmQ7Pi7jA+gS2yQ=
