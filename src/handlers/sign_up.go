@@ -129,7 +129,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 			Link string
 		}{
 			Code: verificationCode,
-			Link: fmt.Sprintf("http://localhost:8080/#/verify?accountId=%s&code=%s", accountID, verificationCode),
+			Link: fmt.Sprintf("http://blp-frontend.internal.badanamu.net/#/verify_email?accountId=%s&code=%s", accountID, verificationCode),
 		},
 	}
 	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
