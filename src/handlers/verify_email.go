@@ -19,6 +19,10 @@ type verifyEmailRequestBody struct {
 	VerificationCode string `json:"verificationCode"`
 }
 
+type verifyEmailResponseBody struct {
+	Email string `json:"email"`
+}
+
 // HandleVerifyEmail handles account email verification requests.
 func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
@@ -89,5 +93,9 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 		return resp.SetServerError(err)
 	}
 
+	response := verifyEmailResponseBody{
+		Email: userEmail,
+	}
+	resp.SetBody(&response)
 	return nil
 }
