@@ -7,8 +7,8 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/go-server-emails/emailtemplates"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -51,8 +51,10 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
-		log.Printf("[VERIFY] A verify request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		log.Printf("[VERIFY] A verify email request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
+	} else if accounts.IsAccountEmailVerified(verificationInfo.Flags) {
+		return resp.SetClientError(apierrors.ErrorAlreadyVerified)
 	}
 
 	if verificationInfo.VerificationCodes.Email == nil {
@@ -63,7 +65,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
-	err = accountDB.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag)
+	err = accountDB.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountEmailVerifiedFlag)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
@@ -77,12 +79,14 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	}
 
 	// Send the welcome email
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: userEmail,
-		Language:       userLanguage,
-		TemplateName:   emailtemplates.WelcomeTemplate,
+	emailMessage := &messages.Message{
+		MessageType: messages.MessageTypeEmail,
+		Priority:    messages.MessagePriorityEmailNormal,
+		Recipient:   userEmail,
+		Language:    userLanguage,
+		Template:    &messagetemplates.WelcomeTemplate{},
 	}
-	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
+	err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

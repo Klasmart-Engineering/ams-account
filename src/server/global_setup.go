@@ -4,17 +4,18 @@ package server
 
 import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
 	"bitbucket.org/calmisland/go-server-account/avatar"
 	"bitbucket.org/calmisland/go-server-aws/awsdynamodb"
 	"bitbucket.org/calmisland/go-server-aws/awss3"
 	"bitbucket.org/calmisland/go-server-aws/awssqs"
 	"bitbucket.org/calmisland/go-server-configs/configs"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-geoip/services/maxmind"
 	"bitbucket.org/calmisland/go-server-logs/errorreporter"
 	"bitbucket.org/calmisland/go-server-logs/errorreporter/slackreporter"
+	"bitbucket.org/calmisland/go-server-messages/sendmessagequeue"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 )
@@ -30,9 +31,10 @@ func Setup() {
 	setupAccessTokenSystems()
 	setupPasswordPolicyValidator()
 	setupPasswordHasher()
-	setupEmailQueue()
+	setupMessageQueue()
 	setupGeoIP()
 	setupAvatarStorage()
+	setupAccountVerificationService()
 	setupSlackReporter()
 
 	globals.Verify()
@@ -76,20 +78,20 @@ func setupPasswordHasher() {
 	}
 }
 
-func setupEmailQueue() {
+func setupMessageQueue() {
 	var queueConfig awssqs.QueueConfig
-	err := configs.LoadConfig("email_send_sqs", &queueConfig, true)
+	err := configs.LoadConfig("message_send_sqs", &queueConfig, true)
 	if err != nil {
 		panic(err)
 	}
 
-	emailSendQueue, err := awssqs.NewQueue(queueConfig)
+	messageSendQueue, err := awssqs.NewQueue(queueConfig)
 	if err != nil {
 		panic(err)
 	}
 
-	globals.EmailSendQueue, err = emailqueue.NewEmailSendQueue(emailqueue.EmailSendQueueConfig{
-		Queue: emailSendQueue,
+	globals.MessageSendQueue, err = sendmessagequeue.New(sendmessagequeue.QueueConfig{
+		Queue: messageSendQueue,
 	})
 	if err != nil {
 		panic(err)
@@ -123,6 +125,19 @@ func setupAvatarStorage() {
 	}
 
 	globals.AvatarStorage, err = avatar.NewStorage(avatarStorageConfig)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func setupAccountVerificationService() {
+	var accountVerificationConfig accountverificationservice.Config
+	err := configs.LoadConfig("account_verification", &accountVerificationConfig, true)
+	if err != nil {
+		panic(err)
+	}
+
+	globals.AccountVerificationService, err = accountverificationservice.New(accountVerificationConfig)
 	if err != nil {
 		panic(err)
 	}

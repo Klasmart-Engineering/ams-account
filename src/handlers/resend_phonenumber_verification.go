@@ -14,14 +14,14 @@ import (
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 )
 
-type resendEmailVerificationRequestBody struct {
+type resendPhoneNumberVerificationRequestBody struct {
 	AccountID string `json:"accountId"`
 }
 
-// HandleResendEmailVerification handles requests for resending email verifications.
-func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+// HandleResendPhoneNumberVerification handles requests for resending phone number verifications.
+func HandleResendPhoneNumberVerification(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
-	var reqBody resendEmailVerificationRequestBody
+	var reqBody resendPhoneNumberVerificationRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
@@ -45,16 +45,16 @@ func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, 
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
-		log.Printf("[RESENDVERIFY] A resend email verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		log.Printf("[RESENDVERIFY] A resend phone number verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorVerificationNotFound)
 	}
 
-	if accounts.IsAccountEmailVerified(verificationInfo.Flags) {
-		log.Printf("[RESENDVERIFY] A resend email verification request for account [%s] that was already verified from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	if accounts.IsAccountPhoneNumberVerified(verificationInfo.Flags) {
+		log.Printf("[RESENDVERIFY] A resend phone number verification request for account [%s] that was already verified from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorAlreadyVerified)
 	}
 
-	log.Printf("[RESENDVERIFY] A successful resend email verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	log.Printf("[RESENDVERIFY] A successful resend phone number verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	// Generate a new verification code
 	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)
@@ -63,26 +63,24 @@ func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, 
 	}
 
 	// Create the account verification in the database
-	err = accountDB.CreateAccountVerification(accountID, accountdatabase.VerificationTypeEmail, verificationCode)
+	err = accountDB.CreateAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber, verificationCode)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
 
-	// Re-send the verification email
-	userEmail := verificationInfo.Email
+	// Re-send the verification SMS
+	userPhoneNumber := verificationInfo.PhoneNumber
 	userLanguage := verificationInfo.Language
-	verificationLink := globals.AccountVerificationService.GetVerificationLink(accountID, verificationCode, userLanguage)
-	emailMessage := &messages.Message{
-		MessageType: messages.MessageTypeEmail,
-		Priority:    messages.MessagePriorityEmailHigh,
-		Recipient:   userEmail,
+	smsMessage := &messages.Message{
+		MessageType: messages.MessageTypeSMS,
+		Priority:    messages.MessagePrioritySMSTransactional,
+		Recipient:   userPhoneNumber,
 		Language:    userLanguage,
-		Template: &messagetemplates.EmailVerificationTemplate{
+		Template: &messagetemplates.PhoneVerificationTemplate{
 			Code: verificationCode,
-			Link: verificationLink,
 		},
 	}
-	err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
+	err = globals.MessageSendQueue.EnqueueMessage(smsMessage)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

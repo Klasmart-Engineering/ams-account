@@ -33,10 +33,12 @@ func createLambdaRouterV1() *apirouter.Router {
 
 	accountResendVerifyRouter := apirouter.NewRouter()
 	accountResendVerifyRouter.AddMethodHandler("POST", "email", handlers.HandleResendEmailVerification)
+	accountResendVerifyRouter.AddMethodHandler("POST", "phonenumber", handlers.HandleResendPhoneNumberVerification)
 	accountResendRouter.AddRouter("verification", accountResendVerifyRouter)
 
 	accountVerifyRouter := apirouter.NewRouter()
 	accountVerifyRouter.AddMethodHandler("POST", "email", handlers.HandleVerifyEmail)
+	accountVerifyRouter.AddMethodHandler("POST", "phonenumber", handlers.HandleVerifyPhoneNumber)
 	accountRouter.AddRouter("verify", accountVerifyRouter)
 
 	selfAccountRouter := apirouter.NewRouter()

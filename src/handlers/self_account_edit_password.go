@@ -7,8 +7,8 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/go-server-emails/emailtemplates"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 )
@@ -96,15 +96,20 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 		userLanguage = defaultLanguageCode
 	}
 
-	// Sends an email about the change
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: userEmail,
-		Language:       userLanguage,
-		TemplateName:   emailtemplates.ChangedPasswordTemplate,
-	}
-	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
-	if err != nil {
-		return resp.SetServerError(err)
+	// TODO: Do we want to send SMS for this if there is no available email address?
+	if len(userEmail) > 0 {
+		// Sends an email about the change
+		emailMessage := &messages.Message{
+			MessageType: messages.MessageTypeEmail,
+			Priority:    messages.MessagePriorityEmailHigh,
+			Recipient:   userEmail,
+			Language:    userLanguage,
+			Template:    &messagetemplates.ChangedPasswordTemplate{},
+		}
+		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
+		if err != nil {
+			return resp.SetServerError(err)
+		}
 	}
 
 	return nil

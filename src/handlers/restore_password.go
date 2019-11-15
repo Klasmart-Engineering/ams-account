@@ -7,19 +7,20 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/go-server-emails/emailtemplates"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 )
 
 type restorePasswordRequestBody struct {
-	AccountID        string `json:"accountId"`
-	AccountEmail     string `json:"accountEmail"`
-	VerificationCode string `json:"verificationCode"`
-	Password         string `json:"pw"`
-	PartnerID        int32  `json:"partnerId"`
+	AccountID          string `json:"accountId"`
+	AccountEmail       string `json:"accountEmail"`
+	AccountPhoneNumber string `json:"accountPhoneNr"`
+	VerificationCode   string `json:"verificationCode"`
+	Password           string `json:"pw"`
+	PartnerID          int32  `json:"partnerId"`
 }
 
 // HandleRestorePassword handles password restore requests.
@@ -56,17 +57,33 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	}
 
 	if len(accountID) == 0 {
-		// We have to first get the account ID from the email
-		accountEmail := reqBody.AccountEmail
-		accountIDResult, err := accountDB.GetAccountID(accountEmail, partnerID)
-		if err != nil {
-			return resp.SetServerError(err)
-		} else if accountIDResult == nil {
-			log.Printf("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-			return resp.SetClientError(apierrors.ErrorItemNotFound)
-		}
+		if len(reqBody.AccountEmail) > 0 {
+			// Get the account ID from the email
+			accountEmail := reqBody.AccountEmail
+			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromEmail(accountEmail, partnerID)
+			if err != nil {
+				return resp.SetServerError(err)
+			} else if !foundAccount {
+				log.Printf("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
+				return resp.SetClientError(apierrors.ErrorItemNotFound)
+			}
 
-		accountID = *accountIDResult
+			accountID = accountIDResult
+		} else if len(reqBody.AccountPhoneNumber) > 0 {
+			// Get the account ID from the email
+			accountPhoneNumber := reqBody.AccountPhoneNumber
+			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromPhoneNumber(accountPhoneNumber)
+			if err != nil {
+				return resp.SetServerError(err)
+			} else if !foundAccount {
+				log.Printf("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
+				return resp.SetClientError(apierrors.ErrorItemNotFound)
+			}
+
+			accountID = accountIDResult
+		} else {
+			return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("accountEmail"))
+		}
 	}
 
 	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
@@ -125,15 +142,20 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		userLanguage = defaultLanguageCode
 	}
 
-	// Sends an email about the change
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: userEmail,
-		Language:       userLanguage,
-		TemplateName:   emailtemplates.ChangedPasswordTemplate,
-	}
-	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
-	if err != nil {
-		return resp.SetServerError(err)
+	// TODO: Do we want to send SMS for this if there is no available email address?
+	if len(userEmail) > 0 {
+		// Sends an email about the change
+		emailMessage := &messages.Message{
+			MessageType: messages.MessageTypeEmail,
+			Priority:    messages.MessagePriorityEmailHigh,
+			Recipient:   userEmail,
+			Language:    userLanguage,
+			Template:    &messagetemplates.ChangedPasswordTemplate{},
+		}
+		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
+		if err != nil {
+			return resp.SetServerError(err)
+		}
 	}
 
 	return nil
