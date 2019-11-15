@@ -395,7 +395,7 @@
                                     "properties": {
                                         "email": {
                                             "type": "string",
-                                            "description": "The email address of the verified account..",
+                                            "description": "The email address of the verified account.",
                                             "example": "email@example.com"
                                         }
                                     }

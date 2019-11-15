@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
@@ -124,11 +125,11 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		Language:       userLanguage,
 		TemplateName:   emailtemplates.EmailVerificationTemplate,
 		TemplateData: struct {
-			Code            string
-			VerificationURL string
+			Code string
+			Link string
 		}{
-			Code:            verificationCode,
-			VerificationURL: "http://localhost:8080/#/verify?accountId={accountID}&code={verificationCode}",
+			Code: verificationCode,
+			Link: fmt.Sprintf("http://localhost:8080/#/verify?accountId={%s}&code={%s}", accountID, verificationCode),
 		},
 	}
 	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
