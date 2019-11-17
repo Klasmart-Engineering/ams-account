@@ -40,6 +40,8 @@ func HandleSelfAccountAvatarDownload(_ context.Context, req *apirequests.Request
 	})
 	if err != nil {
 		return resp.SetServerError(err)
+	} else if downloadURLResult == nil {
+		return resp.SetClientError(apierrors.ErrorItemNotFound)
 	}
 
 	// Skip the redirection if the client can use the cached version

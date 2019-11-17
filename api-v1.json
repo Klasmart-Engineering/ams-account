@@ -611,7 +611,7 @@
                     }
                 ]
             },
-            "post": {
+            "put": {
                 "operationId": "uploadAvatarSelf",
                 "summary": "Upload Avatar (Self)",
                 "description": "Uploads a new avatar for the signed in user account.",
