@@ -436,6 +436,47 @@
             }
         },
         "/account/verify/email": {
+            "get": {
+                "operationId": "getEmailVerificationStatus",
+                "summary": "Get Email Verification Status",
+                "description": "Returns the email address verification status.",
+                "tags": ["account"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accountId",
+                        "description": "The account ID to query.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the email address verification status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["verified"],
+                                    "properties": {
+                                        "verified": {
+                                            "type": "boolean",
+                                            "description": "If the account email address has been verified."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            },
             "post": {
                 "operationId": "verifyEmail",
                 "summary": "Verify Email Address",
@@ -492,6 +533,47 @@
             }
         },
         "/account/verify/phonenumber": {
+            "get": {
+                "operationId": "getPhoneNumberVerificationStatus",
+                "summary": "Get Phone Number Verification Status",
+                "description": "Returns the phone number verification status.",
+                "tags": ["account"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accountId",
+                        "description": "The account ID to query.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the phone number verification status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["verified"],
+                                    "properties": {
+                                        "verified": {
+                                            "type": "boolean",
+                                            "description": "If the account phone number has been verified."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            },
             "post": {
                 "operationId": "verifyPhoneNumber",
                 "summary": "Verify Phone Number",
