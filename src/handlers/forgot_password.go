@@ -7,20 +7,27 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/go-server-emails/emailtemplates"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
+	"bitbucket.org/calmisland/go-server-utils/phoneutils"
 	"bitbucket.org/calmisland/go-server-utils/textutils"
 )
 
+const (
+	forgotPasswordRegularVerificationCodeByteLength = 4
+	forgotPasswordAdminVerificationCodeByteLength   = 10
+)
+
 type forgotPasswordRequestBody struct {
-	User      string `json:"user"`
-	Language  string `json:"lang"`
-	PartnerID int32  `json:"partnerId"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNr"`
+	Language    string `json:"lang"`
+	PartnerID   int32  `json:"partnerId"`
 }
 
 // HandleForgotPassword handles forgot password requests.
@@ -32,7 +39,8 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
 	}
 
-	userEmail := reqBody.User
+	userEmail := reqBody.Email
+	userPhoneNumber := phoneutils.CleanPhoneNumber(reqBody.PhoneNumber)
 	userLanguage := textutils.SanitizeString(reqBody.Language)
 	partnerID := accounts.GetPartnerID(reqBody.PartnerID)
 	clientIP := req.SourceIP
@@ -43,11 +51,29 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
-	// Validate parameters
-	if !emailutils.IsValidEmailAddressFormat(userEmail) {
-		return resp.SetClientError(apierrors.ErrorInvalidEmailFormat)
-	} else if !emailutils.IsValidEmailAddressHost(userEmail) {
-		return resp.SetClientError(apierrors.ErrorInvalidEmailHost)
+	var isUsingEmail bool
+	if len(userEmail) > 0 {
+		// Validate parameters
+		if !emailutils.IsValidEmailAddressFormat(userEmail) {
+			return resp.SetClientError(apierrors.ErrorInvalidEmailFormat)
+		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
+			return resp.SetClientError(apierrors.ErrorInvalidEmailHost)
+		}
+
+		// There should not be an email and a phone number at the same time
+		userPhoneNumber = ""
+		isUsingEmail = true
+	} else if len(userPhoneNumber) > 0 {
+		if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
+			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+		}
+
+		// There should not be an email and a phone number at the same time
+		userEmail = ""
+		isUsingEmail = false
+	} else {
+		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	// Sets the default language if none is set
@@ -61,16 +87,26 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		return resp.SetServerError(err)
 	}
 
-	// First get the account ID from the email
-	accountID, err := accountDB.GetAccountID(userEmail, partnerID)
-	if err != nil {
-		return resp.SetServerError(err)
+	var accountID string
+	var foundAccount bool
+	if isUsingEmail {
+		// Get the account ID from the email
+		accountID, foundAccount, err = accountDB.GetAccountIDFromEmail(userEmail, partnerID)
+		if err != nil {
+			return resp.SetServerError(err)
+		}
+	} else {
+		// Get the account ID from the phone number
+		accountID, foundAccount, err = accountDB.GetAccountIDFromPhoneNumber(userPhoneNumber)
+		if err != nil {
+			return resp.SetServerError(err)
+		}
 	}
 
 	// Then get the account information
 	var accInfo *accountdatabase.AccountSignInInfo
-	if accountID != nil {
-		accInfo, err = accountDB.GetAccountSignInInfoByID(*accountID)
+	if foundAccount {
+		accInfo, err = accountDB.GetAccountSignInInfoByID(accountID)
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
@@ -79,11 +115,11 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	}
 
 	if accInfo != nil {
-		log.Printf("[FORGETPW] A request to recover from a forgotten password received for existing account [%s] from IP [%s] with UserAgent [%s]\n", *accountID, clientIP, clientUserAgent)
+		log.Printf("[FORGETPW] A request to recover from a forgotten password received for existing account [%s] from IP [%s] with UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
-		verificationCodeByteCount := 4
+		verificationCodeByteCount := forgotPasswordRegularVerificationCodeByteLength
 		if accInfo.AdminRole > 0 {
-			verificationCodeByteCount = 8
+			verificationCodeByteCount = forgotPasswordAdminVerificationCodeByteLength
 		}
 		verificationCode, err := securitycodes.GenerateSecurityCode(verificationCodeByteCount)
 		if err != nil {
@@ -101,40 +137,68 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 			userLanguage = defaultLanguageCode
 		}
 
-		userEmail = accInfo.Email
-		err = sendForgotPasswordEmailFound(userEmail, userLanguage, verificationCode)
+		template := &messagetemplates.PasswordResetTemplate{
+			Code: verificationCode,
+		}
+
+		if isUsingEmail {
+			userEmail = accInfo.Email
+			err = sendForgotPasswordEmailFound(userEmail, userLanguage, template)
+			if err != nil {
+				return resp.SetServerError(err)
+			}
+		} else {
+			userPhoneNumber = accInfo.PhoneNumber
+			err = sendForgotPasswordSMSFound(userPhoneNumber, userLanguage, template)
+			if err != nil {
+				return resp.SetServerError(err)
+			}
+		}
 	} else {
-		log.Printf("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-
-		err = sendForgotPasswordEmailNotFound(userEmail, userLanguage)
-	}
-
-	if err != nil {
-		return resp.SetServerError(err)
+		if isUsingEmail {
+			log.Printf("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			err = sendForgotPasswordEmailNotFound(userEmail, userLanguage)
+			if err != nil {
+				return resp.SetServerError(err)
+			}
+		} else {
+			// NOTE: We don't send anything to unknown phone numbers
+			log.Printf("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+		}
 	}
 
 	return nil
 }
 
-func sendForgotPasswordEmailFound(email, language, verificationCode string) error {
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: email,
-		Language:       language,
-		TemplateName:   emailtemplates.PasswordResetTemplate,
-		TemplateData: struct {
-			Code string
-		}{
-			Code: verificationCode,
-		},
+func sendForgotPasswordEmailFound(email, language string, template *messagetemplates.PasswordResetTemplate) error {
+	emailMessage := &messages.Message{
+		MessageType: messages.MessageTypeEmail,
+		Priority:    messages.MessagePriorityEmailHigh,
+		Recipient:   email,
+		Language:    language,
+		Template:    template,
 	}
-	return globals.EmailSendQueue.EnqueueEmail(emailMessage)
+	return globals.MessageSendQueue.EnqueueMessage(emailMessage)
+}
+
+func sendForgotPasswordSMSFound(phoneNumber, language string, template *messagetemplates.PasswordResetTemplate) error {
+	emailMessage := &messages.Message{
+		MessageType: messages.MessageTypeSMS,
+		Priority:    messages.MessagePrioritySMSTransactional,
+		Recipient:   phoneNumber,
+		Language:    language,
+		Template:    template,
+	}
+	return globals.MessageSendQueue.EnqueueMessage(emailMessage)
 }
 
 func sendForgotPasswordEmailNotFound(email, language string) error {
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: email,
-		Language:       language,
-		TemplateName:   emailtemplates.PasswordResetFailTemplate,
+	emailMessage := &messages.Message{
+		MessageType: messages.MessageTypeEmail,
+		Priority:    messages.MessagePriorityEmailNormal,
+		Recipient:   email,
+		Language:    language,
+		Template:    &messagetemplates.PasswordResetFailTemplate{},
 	}
-	return globals.EmailSendQueue.EnqueueEmail(emailMessage)
+	return globals.MessageSendQueue.EnqueueMessage(emailMessage)
 }

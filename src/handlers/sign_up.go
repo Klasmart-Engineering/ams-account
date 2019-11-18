@@ -2,29 +2,30 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
-	"bitbucket.org/calmisland/go-server-emails/emailqueue"
-	"bitbucket.org/calmisland/go-server-emails/emailtemplates"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
+	"bitbucket.org/calmisland/go-server-utils/phoneutils"
 	"bitbucket.org/calmisland/go-server-utils/textutils"
 	"github.com/google/uuid"
 )
 
 type signUpRequestBody struct {
-	User      string `json:"user"`
-	Password  string `json:"pw"`
-	Language  string `json:"lang"`
-	PartnerID int32  `json:"partnerId"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNr"`
+	Password    string `json:"pw"`
+	Language    string `json:"lang"`
+	PartnerID   int32  `json:"partnerId"`
 }
 
 type signUpResponseBody struct {
@@ -34,6 +35,8 @@ type signUpResponseBody struct {
 const (
 	defaultCountryCode  = "XX"
 	defaultLanguageCode = "en_US"
+
+	signUpVerificationCodeByteLength = 4
 )
 
 // HandleSignUp handles sign-up requests.
@@ -45,7 +48,8 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
 	}
 
-	userEmail := reqBody.User
+	userEmail := reqBody.Email
+	userPhoneNumber := phoneutils.CleanPhoneNumber(reqBody.PhoneNumber)
 	userPassword := reqBody.Password
 	userLanguage := textutils.SanitizeString(reqBody.Language)
 	partnerID := accounts.GetPartnerID(reqBody.PartnerID)
@@ -57,13 +61,31 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
-	// Validate parameters
-	if !emailutils.IsValidEmailAddressFormat(userEmail) {
-		log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-		return resp.SetClientError(apierrors.ErrorInvalidEmailFormat)
-	} else if !emailutils.IsValidEmailAddressHost(userEmail) {
-		log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-		return resp.SetClientError(apierrors.ErrorInvalidEmailHost)
+	var isUsingEmail bool
+	if len(userEmail) > 0 {
+		// Validate parameters
+		if !emailutils.IsValidEmailAddressFormat(userEmail) {
+			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("email"))
+		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
+			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("email"))
+		}
+
+		// There should not be an email and a phone number at the same time
+		userPhoneNumber = ""
+		isUsingEmail = true
+	} else if len(userPhoneNumber) > 0 {
+		if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
+			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+		}
+
+		// There should not be an email and a phone number at the same time
+		userEmail = ""
+		isUsingEmail = false
+	} else {
+		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	// Validate the password
@@ -78,13 +100,24 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	// Check if the email is already used by another account
-	accountExists, err := accountDB.AccountExists(userEmail, partnerID)
-	if err != nil {
-		return resp.SetServerError(err)
-	} else if accountExists {
-		log.Printf("[SIGNUP] A sign-up request for already existing account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-		return resp.SetClientError(apierrors.ErrorEmailAlreadyUsed)
+	if isUsingEmail {
+		// Check if the email is already used by another account
+		accountExists, err := accountDB.AccountExistsWithEmail(userEmail, partnerID)
+		if err != nil {
+			return resp.SetServerError(err)
+		} else if accountExists {
+			log.Printf("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorEmailAlreadyUsed)
+		}
+	} else {
+		// Check if the phone number is already used by another account
+		accountExists, err := accountDB.AccountExistsWithPhoneNumber(userPhoneNumber)
+		if err != nil {
+			return resp.SetServerError(err)
+		} else if accountExists {
+			log.Printf("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			return resp.SetClientError(apierrors.ErrorPhoneNumberAlreadyUsed)
+		}
 	}
 
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
@@ -92,7 +125,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	verificationCode, err := securitycodes.GenerateSecurityCode(4)
+	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
@@ -118,33 +151,54 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 	}
 
 	accountID := accountUUID.String()
-
-	// Send the verification email
-	emailMessage := &emailqueue.EmailMessage{
-		RecipientEmail: userEmail,
-		Language:       userLanguage,
-		TemplateName:   emailtemplates.EmailVerificationTemplate,
-		TemplateData: struct {
-			Code string
-			Link string
-		}{
-			Code: verificationCode,
-			Link: fmt.Sprintf("http://blp-frontend.internal.badanamu.net/#/verify_email?accountId=%s&code=%s", accountID, verificationCode),
-		},
+	verificationLink := globals.AccountVerificationService.GetVerificationLink(accountID, verificationCode, userLanguage)
+	var message *messages.Message
+	if isUsingEmail {
+		message = &messages.Message{
+			MessageType: messages.MessageTypeEmail,
+			Priority:    messages.MessagePriorityEmailHigh,
+			Recipient:   userEmail,
+			Language:    userLanguage,
+			Template: &messagetemplates.EmailVerificationTemplate{
+				Code: verificationCode,
+				Link: verificationLink,
+			},
+		}
+	} else {
+		message = &messages.Message{
+			MessageType: messages.MessageTypeSMS,
+			Priority:    messages.MessagePrioritySMSTransactional,
+			Recipient:   userPhoneNumber,
+			Language:    userLanguage,
+			Template: &messagetemplates.PhoneVerificationTemplate{
+				Code: verificationCode,
+			},
+		}
 	}
-	err = globals.EmailSendQueue.EnqueueEmail(emailMessage)
+
+	err = globals.MessageSendQueue.EnqueueMessage(message)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
 
+	var emailVerificationCode string
+	var phoneNumberVerificationCode string
+	if isUsingEmail {
+		emailVerificationCode = verificationCode
+	} else {
+		phoneNumberVerificationCode = verificationCode
+	}
+
 	err = accountDB.CreateAccount(&accountdatabase.CreateAccountInfo{
-		ID:                    accountID,
-		Email:                 userEmail,
-		PasswordHash:          hashedPassword,
-		Flags:                 0,
-		EmailVerificationCode: verificationCode,
-		Country:               countryCode,
-		Language:              userLanguage,
+		ID:                          accountID,
+		Email:                       userEmail,
+		PhoneNumber:                 userPhoneNumber,
+		PasswordHash:                hashedPassword,
+		Flags:                       0,
+		EmailVerificationCode:       emailVerificationCode,
+		PhoneNumberVerificationCode: phoneNumberVerificationCode,
+		Country:                     countryCode,
+		Language:                    userLanguage,
 	}, partnerID)
 	if err != nil {
 		return resp.SetServerError(err)

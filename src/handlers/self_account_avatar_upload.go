@@ -42,7 +42,7 @@ func HandleSelfAvatarUpload(_ context.Context, req *apirequests.Request, resp *a
 	var reqBody avatarUploadRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {
-		return resp.SetServerError(err)
+		return resp.SetClientError(apierrors.ErrorBadRequestBody)
 	}
 
 	if len(reqBody.ContentType) == 0 {

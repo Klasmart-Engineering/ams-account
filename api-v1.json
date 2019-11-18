@@ -7,49 +7,19 @@
     },
     "servers": [
         {
-            "url": "https://{region}.api.badanamu.net/v1",
-            "description": "The production API server.",
-            "variables": {
-                "region": {
-                    "default": "seoul",
-                    "description": "The server region.",
-                    "enum": [
-                        "seoul",
-                        "mumbai"
-                    ]
-                }
-            }
+            "url": "https://prod.account.badanamu.net/v1",
+            "description": "The production API server."
         },
         {
-            "url": "https://{region}-test.api.badanamu.net/v1",
-            "description": "The test production API server.",
-            "variables": {
-                "region": {
-                    "default": "seoul",
-                    "description": "The server region.",
-                    "enum": [
-                        "seoul",
-                        "mumbai"
-                    ]
-                }
-            }
+            "url": "https://test.account.badanamu.net/v1",
+            "description": "The test production API server."
         },
         {
-            "url": "https://{region}-beta.api.badanamu.net/v1",
-            "description": "The beta staging API server.",
-            "variables": {
-                "region": {
-                    "default": "seoul",
-                    "description": "The server region.",
-                    "enum": [
-                        "seoul",
-                        "mumbai"
-                    ]
-                }
-            }
+            "url": "https://beta.account.badanamu.net/v1",
+            "description": "The beta staging API server."
         },
         {
-            "url": "https://api.internal.badanamu.net/v1",
+            "url": "https://account.internal.badanamu.net/v1",
             "description": "The in-house API server."
         }
     ],
@@ -128,27 +98,46 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": ["user","lang"],
-                                "properties": {
-                                    "user": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "description": "The email address.",
-                                        "example": "email@example.com"
+                                "oneOf": [
+                                    {
+                                        "required": ["email","lang"],
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "description": "The email address.",
+                                                "example": "email@example.com"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            },
+                                            "partnerId": {
+                                                "type": "integer",
+                                                "format": "int32",
+                                                "description": "The partner ID to use when signing up.",
+                                                "example": 1,
+                                                "deprecated": true
+                                            }
+                                        }
                                     },
-                                    "lang": {
-                                        "type": "string",
-                                        "description": "The language code of the desired communication language.",
-                                        "example": "en_US"
-                                    },
-                                    "partnerId": {
-                                        "type": "integer",
-                                        "format": "int32",
-                                        "description": "The partner ID to use when signing up.",
-                                        "example": 1,
-                                        "deprecated": true
+                                    {
+                                        "required": ["phoneNr","lang"],
+                                        "properties": {
+                                            "phoneNr": {
+                                                "type": "string",
+                                                "description": "The phone number.",
+                                                "example": "+14155552671"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -234,6 +223,34 @@
                                                 "deprecated": true
                                             }
                                         }
+                                    },
+                                    {
+                                        "required": ["accountPhoneNr","verificationCode","pw"],
+                                        "properties": {
+                                            "accountPhoneNr": {
+                                                "type": "string",
+                                                "description": "The account phone number.",
+                                                "example": "+14155552671"
+                                            },
+                                            "verificationCode": {
+                                                "type": "string",
+                                                "description": "The verification code received by communication.",
+                                                "example": "en_US"
+                                            },
+                                            "pw": {
+                                                "type": "string",
+                                                "format": "password",
+                                                "description": "The new password.",
+                                                "example": "password"
+                                            },
+                                            "partnerId": {
+                                                "type": "integer",
+                                                "format": "int32",
+                                                "description": "The partner ID to use when signing up.",
+                                                "example": 1,
+                                                "deprecated": true
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -264,32 +281,57 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": ["user","pw","lang"],
-                                "properties": {
-                                    "user": {
-                                        "type": "string",
-                                        "description": "The email address.",
-                                        "example": "email@example.com"
+                                "oneOf": [
+                                    {
+                                        "required": ["email","pw","lang"],
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "description": "The email address.",
+                                                "example": "email@example.com"
+                                            },
+                                            "pw": {
+                                                "type": "string",
+                                                "format": "password",
+                                                "description": "The password.",
+                                                "example": "password"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            },
+                                            "partnerId": {
+                                                "type": "integer",
+                                                "format": "int32",
+                                                "description": "The partner ID to use when signing up.",
+                                                "example": 1,
+                                                "deprecated": true
+                                            }
+                                        }
                                     },
-                                    "pw": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "description": "The password.",
-                                        "example": "password"
-                                    },
-                                    "lang": {
-                                        "type": "string",
-                                        "description": "The language code of the desired communication language.",
-                                        "example": "en_US"
-                                    },
-                                    "partnerId": {
-                                        "type": "integer",
-                                        "format": "int32",
-                                        "description": "The partner ID to use when signing up.",
-                                        "example": 1,
-                                        "deprecated": true
+                                    {
+                                        "required": ["phoneNr","pw","lang"],
+                                        "properties": {
+                                            "phoneNr": {
+                                                "type": "string",
+                                                "description": "The phone number.",
+                                                "example": "+14155552671"
+                                            },
+                                            "pw": {
+                                                "type": "string",
+                                                "format": "password",
+                                                "description": "The password.",
+                                                "example": "password"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -357,7 +399,84 @@
                 }
             }
         },
+        "/account/resend/verification/phonenumber": {
+            "post": {
+                "operationId": "resendPhoneNumberVerification",
+                "summary": "Resend Phone Number Verification",
+                "description": "Resends a phone number verification SMS.",
+                "tags": ["account"],
+                "requestBody": {
+                    "description": "The resend phone number verification request information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["accountId"],
+                                "properties": {
+                                    "accountId": {
+                                        "type": "string",
+                                        "description": "The account ID of the account to resend the phone number verification for.",
+                                        "example": "ABC-123"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully resent an phone number verification SMS."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            }
+        },
         "/account/verify/email": {
+            "get": {
+                "operationId": "getEmailVerificationStatus",
+                "summary": "Get Email Verification Status",
+                "description": "Returns the email address verification status.",
+                "tags": ["account"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accountId",
+                        "description": "The account ID to query.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the email address verification status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["verified"],
+                                    "properties": {
+                                        "verified": {
+                                            "type": "boolean",
+                                            "description": "If the account email address has been verified."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            },
             "post": {
                 "operationId": "verifyEmail",
                 "summary": "Verify Email Address",
@@ -395,8 +514,105 @@
                                     "properties": {
                                         "email": {
                                             "type": "string",
+                                            "format": "email",
                                             "description": "The email address of the verified account.",
                                             "example": "email@example.com"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            }
+        },
+        "/account/verify/phonenumber": {
+            "get": {
+                "operationId": "getPhoneNumberVerificationStatus",
+                "summary": "Get Phone Number Verification Status",
+                "description": "Returns the phone number verification status.",
+                "tags": ["account"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accountId",
+                        "description": "The account ID to query.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the phone number verification status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["verified"],
+                                    "properties": {
+                                        "verified": {
+                                            "type": "boolean",
+                                            "description": "If the account phone number has been verified."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "verifyPhoneNumber",
+                "summary": "Verify Phone Number",
+                "description": "Verifies a phone number.",
+                "tags": ["account"],
+                "requestBody": {
+                    "description": "The verify phone number request information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["accountId","verificationCode"],
+                                "properties": {
+                                    "accountId": {
+                                        "type": "string",
+                                        "description": "The account ID of the account to verify the phone number for.",
+                                        "example": "ABC-123"
+                                    },
+                                    "verificationCode": {
+                                        "type": "string",
+                                        "description": "The verification code received in the email.",
+                                        "example": "CODE123"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully verified the phone number.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["phoneNr"],
+                                    "properties": {
+                                        "phoneNr": {
+                                            "type": "string",
+                                            "description": "The phone number of the verified account.",
+                                            "example": "+14155552671"
                                         }
                                     }
                                 }
@@ -611,7 +827,7 @@
                     }
                 ]
             },
-            "post": {
+            "put": {
                 "operationId": "uploadAvatarSelf",
                 "summary": "Upload Avatar (Self)",
                 "description": "Uploads a new avatar for the signed in user account.",
