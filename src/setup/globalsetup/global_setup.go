@@ -1,6 +1,4 @@
-// +build !china
-
-package server
+package globalsetup
 
 import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
@@ -26,8 +24,7 @@ func Setup() {
 		panic(err)
 	}
 
-	accountdynamodb.ActivateDatabase()
-
+	setupDatabases()
 	setupAccessTokenSystems()
 	setupPasswordPolicyValidator()
 	setupPasswordHasher()
@@ -38,6 +35,10 @@ func Setup() {
 	setupSlackReporter()
 
 	globals.Verify()
+}
+
+func setupDatabases() {
+	accountdynamodb.ActivateDatabase()
 }
 
 func setupAccessTokenSystems() {

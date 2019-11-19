@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -48,17 +48,17 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
-		log.Printf("[VERIFY] A verify phone number request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] A verify phone number request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	} else if accounts.IsAccountPhoneNumberVerified(verificationInfo.Flags) {
 		return resp.SetClientError(apierrors.ErrorAlreadyVerified)
 	}
 
 	if verificationInfo.VerificationCodes.PhoneNumber == nil {
-		log.Printf("[VERIFY] A phone number verify request for account [%s] without pending phone number verification from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] A phone number verify request for account [%s] without pending phone number verification from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	} else if !securitycodes.ValidateSecurityCode(*verificationInfo.VerificationCodes.PhoneNumber, verificationCode) {
-		log.Printf("[VERIFY] A phone number verify request for account [%s] with incorrect verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[VERIFY] A phone number verify request for account [%s] with incorrect verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
@@ -67,7 +67,7 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 		return resp.SetServerError(err)
 	}
 
-	log.Printf("[VERIFY] A successful phone number verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	logger.LogFormat("[VERIFY] A successful phone number verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	userPhoneNumber := verificationInfo.PhoneNumber
 	userLanguage := verificationInfo.Language

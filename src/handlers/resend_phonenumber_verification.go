@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
@@ -45,16 +45,16 @@ func HandleResendPhoneNumberVerification(_ context.Context, req *apirequests.Req
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
-		log.Printf("[RESENDVERIFY] A resend phone number verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[RESENDVERIFY] A resend phone number verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorVerificationNotFound)
 	}
 
 	if accounts.IsAccountPhoneNumberVerified(verificationInfo.Flags) {
-		log.Printf("[RESENDVERIFY] A resend phone number verification request for account [%s] that was already verified from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+		logger.LogFormat("[RESENDVERIFY] A resend phone number verification request for account [%s] that was already verified from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return resp.SetClientError(apierrors.ErrorAlreadyVerified)
 	}
 
-	log.Printf("[RESENDVERIFY] A successful resend phone number verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
+	logger.LogFormat("[RESENDVERIFY] A successful resend phone number verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	// Generate a new verification code
 	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)

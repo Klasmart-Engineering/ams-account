@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	bitbucket.org/calmisland/go-server-account v1.10.0
-	bitbucket.org/calmisland/go-server-api v0.1.0
+	bitbucket.org/calmisland/go-server-api v0.2.0
 	bitbucket.org/calmisland/go-server-auth v1.1.1
 	bitbucket.org/calmisland/go-server-aws v1.13.0
 	bitbucket.org/calmisland/go-server-cloud v0.4.0

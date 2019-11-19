@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"context"
-	"log"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
@@ -57,10 +57,10 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 	if len(userEmail) > 0 {
 		// Validate parameters
 		if !emailutils.IsValidEmailAddressFormat(userEmail) {
-			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("email"))
 		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
-			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("email"))
 		}
 
@@ -69,7 +69,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		isUsingEmail = true
 	} else if len(userPhoneNumber) > 0 {
 		if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
-			log.Printf("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
@@ -98,7 +98,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accountExists {
-			log.Printf("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorEmailAlreadyUsed)
 		}
 	} else {
@@ -107,7 +107,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accountExists {
-			log.Printf("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
+			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorPhoneNumberAlreadyUsed)
 		}
 	}
@@ -196,7 +196,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	log.Printf("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+	logger.LogFormat("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 
 	response := signUpResponseBody{
 		AccountID: accountID,
