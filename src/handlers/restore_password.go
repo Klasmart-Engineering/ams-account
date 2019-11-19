@@ -20,7 +20,6 @@ type restorePasswordRequestBody struct {
 	AccountPhoneNumber string `json:"accountPhoneNr"`
 	VerificationCode   string `json:"verificationCode"`
 	Password           string `json:"pw"`
-	PartnerID          int32  `json:"partnerId"`
 }
 
 // HandleRestorePassword handles password restore requests.
@@ -41,14 +40,8 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	accountID := reqBody.AccountID
 	verificationCode := reqBody.VerificationCode
 	password := reqBody.Password
-	partnerID := accounts.GetPartnerID(reqBody.PartnerID)
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
-
-	// Make sure that the partner ID is valid
-	if !accounts.IsPartnerValid(partnerID) {
-		return resp.SetClientError(apierrors.ErrorInvalidParameters)
-	}
 
 	// Get the database
 	accountDB, err := accountdatabase.GetDatabase()
@@ -60,7 +53,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		if len(reqBody.AccountEmail) > 0 {
 			// Get the account ID from the email
 			accountEmail := reqBody.AccountEmail
-			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromEmail(accountEmail, partnerID)
+			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromEmail(accountEmail)
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {

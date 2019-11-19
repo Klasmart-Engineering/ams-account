@@ -112,13 +112,6 @@
                                                 "type": "string",
                                                 "description": "The language code of the desired communication language.",
                                                 "example": "en_US"
-                                            },
-                                            "partnerId": {
-                                                "type": "integer",
-                                                "format": "int32",
-                                                "description": "The partner ID to use when signing up.",
-                                                "example": 1,
-                                                "deprecated": true
                                             }
                                         }
                                     },
@@ -185,13 +178,6 @@
                                                 "format": "password",
                                                 "description": "The new password.",
                                                 "example": "password"
-                                            },
-                                            "partnerId": {
-                                                "type": "integer",
-                                                "format": "int32",
-                                                "description": "The partner ID to use when signing up.",
-                                                "example": 1,
-                                                "deprecated": true
                                             }
                                         }
                                     },
@@ -214,13 +200,6 @@
                                                 "format": "password",
                                                 "description": "The new password.",
                                                 "example": "password"
-                                            },
-                                            "partnerId": {
-                                                "type": "integer",
-                                                "format": "int32",
-                                                "description": "The partner ID to use when signing up.",
-                                                "example": 1,
-                                                "deprecated": true
                                             }
                                         }
                                     },
@@ -242,13 +221,6 @@
                                                 "format": "password",
                                                 "description": "The new password.",
                                                 "example": "password"
-                                            },
-                                            "partnerId": {
-                                                "type": "integer",
-                                                "format": "int32",
-                                                "description": "The partner ID to use when signing up.",
-                                                "example": 1,
-                                                "deprecated": true
                                             }
                                         }
                                     }
@@ -300,13 +272,6 @@
                                                 "type": "string",
                                                 "description": "The language code of the desired communication language.",
                                                 "example": "en_US"
-                                            },
-                                            "partnerId": {
-                                                "type": "integer",
-                                                "format": "int32",
-                                                "description": "The partner ID to use when signing up.",
-                                                "example": 1,
-                                                "deprecated": true
                                             }
                                         }
                                     },
