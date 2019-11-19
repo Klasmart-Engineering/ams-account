@@ -27,7 +27,6 @@ type forgotPasswordRequestBody struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNr"`
 	Language    string `json:"lang"`
-	PartnerID   int32  `json:"partnerId"`
 }
 
 // HandleForgotPassword handles forgot password requests.
@@ -42,14 +41,8 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	userEmail := reqBody.Email
 	userPhoneNumber := phoneutils.CleanPhoneNumber(reqBody.PhoneNumber)
 	userLanguage := textutils.SanitizeString(reqBody.Language)
-	partnerID := accounts.GetPartnerID(reqBody.PartnerID)
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
-
-	// Make sure that the partner ID is valid
-	if !accounts.IsPartnerValid(partnerID) {
-		return resp.SetClientError(apierrors.ErrorInvalidParameters)
-	}
 
 	var isUsingEmail bool
 	if len(userEmail) > 0 {
@@ -91,7 +84,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	var foundAccount bool
 	if isUsingEmail {
 		// Get the account ID from the email
-		accountID, foundAccount, err = accountDB.GetAccountIDFromEmail(userEmail, partnerID)
+		accountID, foundAccount, err = accountDB.GetAccountIDFromEmail(userEmail)
 		if err != nil {
 			return resp.SetServerError(err)
 		}

@@ -6,7 +6,6 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
-	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
@@ -25,7 +24,6 @@ type signUpRequestBody struct {
 	PhoneNumber string `json:"phoneNr"`
 	Password    string `json:"pw"`
 	Language    string `json:"lang"`
-	PartnerID   int32  `json:"partnerId"`
 }
 
 type signUpResponseBody struct {
@@ -52,14 +50,8 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 	userPhoneNumber := phoneutils.CleanPhoneNumber(reqBody.PhoneNumber)
 	userPassword := reqBody.Password
 	userLanguage := textutils.SanitizeString(reqBody.Language)
-	partnerID := accounts.GetPartnerID(reqBody.PartnerID)
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
-
-	// Make sure that the partner ID is valid
-	if !accounts.IsPartnerValid(partnerID) {
-		return resp.SetClientError(apierrors.ErrorInvalidParameters)
-	}
 
 	var isUsingEmail bool
 	if len(userEmail) > 0 {
@@ -102,7 +94,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 
 	if isUsingEmail {
 		// Check if the email is already used by another account
-		accountExists, err := accountDB.AccountExistsWithEmail(userEmail, partnerID)
+		accountExists, err := accountDB.AccountExistsWithEmail(userEmail)
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accountExists {
@@ -199,7 +191,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		PhoneNumberVerificationCode: phoneNumberVerificationCode,
 		Country:                     countryCode,
 		Language:                    userLanguage,
-	}, partnerID)
+	})
 	if err != nil {
 		return resp.SetServerError(err)
 	}
