@@ -6,9 +6,9 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
-	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -31,7 +31,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
 	}
 
-	if len(reqBody.AccountID) == 0 && len(reqBody.AccountEmail) == 0 {
+	if len(reqBody.AccountID) == 0 && len(reqBody.AccountEmail) == 0 && len(reqBody.AccountPhoneNumber) == 0 {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	} else if len(reqBody.VerificationCode) == 0 || len(reqBody.Password) == 0 {
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
