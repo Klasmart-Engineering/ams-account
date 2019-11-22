@@ -26,15 +26,12 @@ func createLambdaRouterV1() *apirouter.Router {
 	requireAuthMiddleware := authmiddlewares.ValidateSession(globals.AccessTokenValidator, true)
 	router := apirouter.NewRouter()
 	router.AddMethodHandler("GET", "serverinfo", HandleServerInfo)
-
-	accountRouter := apirouter.NewRouter()
-	accountRouter.AddMethodHandler("POST", "forgotpassword", HandleForgotPassword)
-	accountRouter.AddMethodHandler("POST", "restorepassword", HandleRestorePassword)
-	accountRouter.AddMethodHandler("POST", "signup", HandleSignUp)
-	router.AddRouter("account", accountRouter)
+	router.AddMethodHandler("POST", "forgotpassword", HandleForgotPassword)
+	router.AddMethodHandler("POST", "restorepassword", HandleRestorePassword)
+	router.AddMethodHandler("POST", "signup", HandleSignUp)
 
 	accountResendRouter := apirouter.NewRouter()
-	accountRouter.AddRouter("resend", accountResendRouter)
+	router.AddRouter("resend", accountResendRouter)
 
 	accountResendVerifyRouter := apirouter.NewRouter()
 	accountResendVerifyRouter.AddMethodHandler("POST", "email", HandleResendEmailVerification)
@@ -46,7 +43,7 @@ func createLambdaRouterV1() *apirouter.Router {
 	accountVerifyRouter.AddMethodHandler("POST", "email", HandleVerifyEmail)
 	accountVerifyRouter.AddMethodHandler("GET", "phonenumber", HandleAccountPhoneVerified)
 	accountVerifyRouter.AddMethodHandler("POST", "phonenumber", HandleVerifyPhoneNumber)
-	accountRouter.AddRouter("verify", accountVerifyRouter)
+	router.AddRouter("verify", accountVerifyRouter)
 
 	selfAccountRouter := apirouter.NewRouter()
 	selfAccountRouter.AddMiddleware(requireAuthMiddleware)
@@ -56,11 +53,11 @@ func createLambdaRouterV1() *apirouter.Router {
 	selfAccountRouter.AddMethodHandler("GET", "avatar", HandleSelfAccountAvatarDownload)
 	selfAccountRouter.AddMethodHandler("PUT", "avatar", HandleSelfAvatarUpload)
 	selfAccountRouter.AddMethodHandler("DELETE", "avatar", HandleSelfAccountAvatarDelete)
-	accountRouter.AddRouter("self", selfAccountRouter)
+	router.AddRouter("self", selfAccountRouter)
 
 	otherAccountRouter := apirouter.NewRouter()
 	otherAccountRouter.AddMiddleware(requireAuthMiddleware)
-	accountRouter.AddRouter("other", otherAccountRouter)
+	router.AddRouter("other", otherAccountRouter)
 
 	specificOtherAccountRouter := apirouter.NewRouter()
 	specificOtherAccountRouter.AddMethodHandler("GET", "info", HandleGetOtherAccountInfo)
