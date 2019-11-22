@@ -26,6 +26,7 @@
     "components": {
         "schemas": {
             "APIError": {
+                "type": "object",
                 "description": "An API error.",
                 "required": ["errCode"],
                 "properties": {
@@ -100,6 +101,7 @@
                             "schema": {
                                 "oneOf": [
                                     {
+                                        "type": "object",
                                         "required": ["email","lang"],
                                         "properties": {
                                             "email": {
@@ -116,6 +118,7 @@
                                         }
                                     },
                                     {
+                                        "type": "object",
                                         "required": ["phoneNr","lang"],
                                         "properties": {
                                             "phoneNr": {
@@ -161,6 +164,7 @@
                             "schema": {
                                 "oneOf": [
                                     {
+                                        "type": "object",
                                         "required": ["accountId","verificationCode","pw"],
                                         "properties": {
                                             "accountId": {
@@ -182,6 +186,7 @@
                                         }
                                     },
                                     {
+                                        "type": "object",
                                         "required": ["accountEmail","verificationCode","pw"],
                                         "properties": {
                                             "accountEmail": {
@@ -204,6 +209,7 @@
                                         }
                                     },
                                     {
+                                        "type": "object",
                                         "required": ["accountPhoneNr","verificationCode","pw"],
                                         "properties": {
                                             "accountPhoneNr": {
@@ -255,6 +261,7 @@
                             "schema": {
                                 "oneOf": [
                                     {
+                                        "type": "object",
                                         "required": ["email","pw","lang"],
                                         "properties": {
                                             "email": {
@@ -276,6 +283,7 @@
                                         }
                                     },
                                     {
+                                        "type": "object",
                                         "required": ["phoneNr","pw","lang"],
                                         "properties": {
                                             "phoneNr": {
@@ -307,6 +315,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["accountId"],
                                     "properties": {
                                         "accountId": {
@@ -339,6 +348,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["accountId"],
                                 "properties": {
                                     "accountId": {
@@ -375,6 +385,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["accountId"],
                                 "properties": {
                                     "accountId": {
@@ -423,6 +434,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["verified"],
                                     "properties": {
                                         "verified": {
@@ -452,6 +464,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["accountId","verificationCode"],
                                 "properties": {
                                     "accountId": {
@@ -475,6 +488,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["email"],
                                     "properties": {
                                         "email": {
@@ -520,6 +534,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["verified"],
                                     "properties": {
                                         "verified": {
@@ -549,6 +564,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["accountId","verificationCode"],
                                 "properties": {
                                     "accountId": {
@@ -572,6 +588,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["phoneNr"],
                                     "properties": {
                                         "phoneNr": {
@@ -605,6 +622,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["email", "country", "lang"],
                                     "properties": {
                                         "fullName": {
@@ -666,6 +684,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "properties": {
                                     "lang": {
                                         "type": "string",
@@ -732,6 +751,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["currPass","newPass"],
                                 "properties": {
                                     "currPass": {
@@ -802,6 +822,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "required": ["contentType","contentSha256","contentLength"],
                                 "properties": {
                                     "contentType": {
@@ -834,6 +855,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["uploadUrl","uploadMethod"],
                                     "properties": {
                                         "uploadUrl": {
@@ -917,6 +939,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "type": "object",
                                     "required": ["email"],
                                     "properties": {
                                         "fullName": {
