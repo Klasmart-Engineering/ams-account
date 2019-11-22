@@ -2,7 +2,8 @@ package globals
 
 import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
-	"bitbucket.org/calmisland/go-server-account/avatar"
+	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/go-server-account/avatars"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-messages/sendmessagequeue"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
@@ -26,10 +27,13 @@ var (
 	GeoIPService geoip.Service
 
 	// AvatarStorage is store handle avatar image.
-	AvatarStorage avatar.Storage
+	AvatarStorage avatars.Storage
 
 	// AccountVerificationService is the account verification service.
 	AccountVerificationService accountverificationservice.Service
+
+	// AccountDatabase is the account database.
+	AccountDatabase accountdatabase.Database
 )
 
 // Verify verifies if all variables have been properly set.
@@ -58,5 +62,9 @@ func Verify() {
 
 	if AccountVerificationService == nil {
 		panic(errors.New("The account verification service has not been set"))
+	}
+
+	if AccountDatabase == nil {
+		panic(errors.New("The account database has not been set"))
 	}
 }

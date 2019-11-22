@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 )
@@ -19,20 +19,13 @@ type selfAccountInfoResponseBody struct {
 
 // HandleGetSelfAccountInfo handles retrieving the signed in account information requests.
 func HandleGetSelfAccountInfo(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	accountID := req.Session.Data.AccountID
-
 	// Then get the account information
-	accInfo, err := accountDB.GetAccountInfo(accountID)
+	accountID := req.Session.Data.AccountID
+	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if accInfo == nil {
-		return resp.SetClientError(apierrors.ErrorInvalidLogin)
+		return resp.SetClientError(apierrors.ErrorItemNotFound)
 	}
 
 	response := selfAccountInfoResponseBody{

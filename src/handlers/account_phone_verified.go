@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
@@ -20,13 +20,7 @@ func HandleAccountPhoneVerified(_ context.Context, req *apirequests.Request, res
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {

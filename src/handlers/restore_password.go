@@ -43,17 +43,11 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	if len(accountID) == 0 {
 		if len(reqBody.AccountEmail) > 0 {
 			// Get the account ID from the email
 			accountEmail := reqBody.AccountEmail
-			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromEmail(accountEmail)
+			accountIDResult, foundAccount, err := globals.AccountDatabase.GetAccountIDFromEmail(accountEmail)
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {
@@ -65,7 +59,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		} else if len(reqBody.AccountPhoneNumber) > 0 {
 			// Get the account ID from the email
 			accountPhoneNumber := reqBody.AccountPhoneNumber
-			accountIDResult, foundAccount, err := accountDB.GetAccountIDFromPhoneNumber(accountPhoneNumber)
+			accountIDResult, foundAccount, err := globals.AccountDatabase.GetAccountIDFromPhoneNumber(accountPhoneNumber)
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {
@@ -79,7 +73,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 		}
 	}
 
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil || verificationInfo.VerificationCodes.Password == nil {
@@ -106,7 +100,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	}
 
 	// Change the password
-	err = accountDB.EditAccount(accountID, &accountdatabase.AccountEditInfo{
+	err = globals.AccountDatabase.EditAccount(accountID, &accountdatabase.AccountEditInfo{
 		PasswordHash: &hashedPassword,
 	})
 	if err != nil {
@@ -114,14 +108,14 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	}
 
 	// Remove the verification code
-	err = accountDB.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePassword)
+	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePassword)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
 
 	// Resets the flag that this account must set a new password
 	if accounts.AccountMustSetPassword(verificationInfo.Flags) {
-		err = accountDB.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
+		err = globals.AccountDatabase.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
 		if err != nil {
 			return resp.SetServerError(err)
 		}

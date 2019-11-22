@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
-	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
@@ -36,14 +35,8 @@ func HandleOtherAccountAvatarDownload(_ context.Context, req *apirequests.Reques
 		ifModifiedSinceTime = &ifModifiedSinceTimeValue
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	// Then get the account information
-	accInfo, err := accountDB.GetAccountInfo(accountID)
+	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if accInfo == nil {

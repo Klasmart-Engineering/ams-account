@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 )
@@ -22,14 +22,8 @@ func HandleGetOtherAccountInfo(_ context.Context, req *apirequests.Request, resp
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	// Then get the account information
-	accInfo, err := accountDB.GetAccountInfo(accountID)
+	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if accInfo == nil {

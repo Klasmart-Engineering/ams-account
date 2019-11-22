@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
@@ -69,14 +70,8 @@ func HandleEditSelfAccountInfo(_ context.Context, req *apirequests.Request, resp
 		}
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	accountID := req.Session.Data.AccountID
-	err = accountDB.EditAccount(accountID, &accountdatabase.AccountEditInfo{
+	err = globals.AccountDatabase.EditAccount(accountID, &accountdatabase.AccountEditInfo{
 		Language: language,
 		Names:    editNameInfo,
 	})

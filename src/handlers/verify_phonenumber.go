@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -38,13 +39,7 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
@@ -62,7 +57,7 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
-	err = accountDB.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountPhoneNumberVerifiedFlag)
+	err = globals.AccountDatabase.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountPhoneNumberVerifiedFlag)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
@@ -78,7 +73,7 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 	// TODO: Do we want to send a welcome SMS?
 
 	// Remove the verification code
-	err = accountDB.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber)
+	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

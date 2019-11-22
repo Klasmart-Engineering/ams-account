@@ -35,13 +35,7 @@ func HandleResendPhoneNumberVerification(_ context.Context, req *apirequests.Req
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
@@ -63,7 +57,7 @@ func HandleResendPhoneNumberVerification(_ context.Context, req *apirequests.Req
 	}
 
 	// Create the account verification in the database
-	err = accountDB.CreateAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber, verificationCode)
+	err = globals.AccountDatabase.CreateAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber, verificationCode)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

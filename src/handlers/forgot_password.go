@@ -74,23 +74,17 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		userLanguage = defaultLanguageCode
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	var accountID string
 	var foundAccount bool
 	if isUsingEmail {
 		// Get the account ID from the email
-		accountID, foundAccount, err = accountDB.GetAccountIDFromEmail(userEmail)
+		accountID, foundAccount, err = globals.AccountDatabase.GetAccountIDFromEmail(userEmail)
 		if err != nil {
 			return resp.SetServerError(err)
 		}
 	} else {
 		// Get the account ID from the phone number
-		accountID, foundAccount, err = accountDB.GetAccountIDFromPhoneNumber(userPhoneNumber)
+		accountID, foundAccount, err = globals.AccountDatabase.GetAccountIDFromPhoneNumber(userPhoneNumber)
 		if err != nil {
 			return resp.SetServerError(err)
 		}
@@ -99,7 +93,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	// Then get the account information
 	var accInfo *accountdatabase.AccountSignInInfo
 	if foundAccount {
-		accInfo, err = accountDB.GetAccountSignInInfoByID(accountID)
+		accInfo, err = globals.AccountDatabase.GetAccountSignInInfoByID(accountID)
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
@@ -119,7 +113,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 			return resp.SetServerError(err)
 		}
 
-		err = accountDB.CreateAccountVerification(accInfo.ID, accountdatabase.VerificationTypePassword, verificationCode)
+		err = globals.AccountDatabase.CreateAccountVerification(accInfo.ID, accountdatabase.VerificationTypePassword, verificationCode)
 		if err != nil {
 			return resp.SetServerError(err)
 		}
