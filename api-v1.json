@@ -87,7 +87,7 @@
         }
     },
     "paths": {
-        "/account/forgotpassword": {
+        "/forgotpassword": {
             "post": {
                 "operationId": "forgotPassword",
                 "summary": "Forgot Password",
@@ -148,7 +148,7 @@
                 }
             }
         },
-        "/account/restorepassword": {
+        "/restorepassword": {
             "post": {
                 "operationId": "restoreForgottenPassword",
                 "summary": "Restore Forgotten Password",
@@ -242,7 +242,7 @@
                 }
             }
         },
-        "/account/signup": {
+        "/signup": {
             "post": {
                 "operationId": "signUp",
                 "summary": "Sign Up",
@@ -328,7 +328,7 @@
                 }
             }
         },
-        "/account/resend/verification/email": {
+        "/resend/verification/email": {
             "post": {
                 "operationId": "resendEmailVerification",
                 "summary": "Resend Email Verification",
@@ -364,7 +364,7 @@
                 }
             }
         },
-        "/account/resend/verification/phonenumber": {
+        "/resend/verification/phonenumber": {
             "post": {
                 "operationId": "resendPhoneNumberVerification",
                 "summary": "Resend Phone Number Verification",
@@ -400,7 +400,7 @@
                 }
             }
         },
-        "/account/verify/email": {
+        "/verify/email": {
             "get": {
                 "operationId": "getEmailVerificationStatus",
                 "summary": "Get Email Verification Status",
@@ -497,7 +497,7 @@
                 }
             }
         },
-        "/account/verify/phonenumber": {
+        "/verify/phonenumber": {
             "get": {
                 "operationId": "getPhoneNumberVerificationStatus",
                 "summary": "Get Phone Number Verification Status",
@@ -593,7 +593,7 @@
                 }
             }
         },
-        "/account/self/info": {
+        "/self/info": {
             "get": {
                 "operationId": "getAccountInfoSelf",
                 "summary": "Get Account Info (Self)",
@@ -721,7 +721,7 @@
                 ]
             }
         },
-        "/account/self/password": {
+        "/self/password": {
             "post": {
                 "operationId": "changePassword",
                 "summary": "Change Password",
@@ -769,7 +769,7 @@
                 ]
             }
         },
-        "/account/self/avatar": {
+        "/self/avatar": {
             "get": {
                 "operationId": "downloadAvatarSelf",
                 "summary": "Download Avatar (Self)",
@@ -894,7 +894,7 @@
                 ]
             }
         },
-        "/account/other/{accountId}/info": {
+        "/other/{accountId}/info": {
             "get": {
                 "operationId": "getAccountInfoOther",
                 "summary": "Get Account Info (Other)",
@@ -959,7 +959,7 @@
                 ]
             }
         },
-        "/account/other/{accountId}/avatar": {
+        "/other/{accountId}/avatar": {
             "get": {
                 "operationId": "downloadAvatarOther",
                 "summary": "Download Avatar (Other)",
