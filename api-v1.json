@@ -917,22 +917,22 @@
             }
         },
         "/other/{accountId}/info": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "accountId",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "required": true,
+                    "description": "The account ID to get information about."
+                }
+            ],
             "get": {
                 "operationId": "getAccountInfoOther",
                 "summary": "Get Account Info (Other)",
                 "description": "Returns the account information about a specific account.",
                 "tags": ["account"],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "accountId",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "The account ID to get information about."
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successfully returned the account information.",
@@ -983,22 +983,22 @@
             }
         },
         "/other/{accountId}/avatar": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "accountId",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "required": true,
+                    "description": "The account ID to get information about."
+                }
+            ],
             "get": {
                 "operationId": "downloadAvatarOther",
                 "summary": "Download Avatar (Other)",
                 "description": "Returns the avatar for a specific account.",
                 "tags": ["account"],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "accountId",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "The account ID to get information about."
-                    }
-                ],
                 "responses": {
                     "307": {
                         "description": "Successfully returned the account avatar using a redirection."
