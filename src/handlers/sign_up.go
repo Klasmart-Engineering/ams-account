@@ -86,15 +86,9 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return handlePasswordValidatorError(resp, err)
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	if isUsingEmail {
 		// Check if the email is already used by another account
-		accountExists, err := accountDB.AccountExistsWithEmail(userEmail)
+		accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accountExists {
@@ -103,7 +97,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		}
 	} else {
 		// Check if the phone number is already used by another account
-		accountExists, err := accountDB.AccountExistsWithPhoneNumber(userPhoneNumber)
+		accountExists, err := globals.AccountDatabase.AccountExistsWithPhoneNumber(userPhoneNumber)
 		if err != nil {
 			return resp.SetServerError(err)
 		} else if accountExists {
@@ -181,7 +175,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		phoneNumberVerificationCode = verificationCode
 	}
 
-	err = accountDB.CreateAccount(&accountdatabase.CreateAccountInfo{
+	err = globals.AccountDatabase.CreateAccount(&accountdatabase.CreateAccountInfo{
 		ID:                          accountID,
 		Email:                       userEmail,
 		PhoneNumber:                 userPhoneNumber,

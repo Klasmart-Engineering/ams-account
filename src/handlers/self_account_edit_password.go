@@ -6,9 +6,9 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
-	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 )
@@ -36,12 +36,6 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 		return resp.SetClientError(apierrors.ErrorInvalidParameters)
 	}
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(newPassword)
 	if err != nil {
@@ -50,7 +44,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 
 	// Get the account information
 	accountID := req.Session.Data.AccountID
-	accInfo, err := accountDB.GetAccountSignInInfoByID(accountID)
+	accInfo, err := globals.AccountDatabase.GetAccountSignInInfoByID(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if accInfo == nil {
@@ -71,7 +65,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 	}
 
 	// Change the password in the database
-	err = accountDB.EditAccount(accountID, &accountdatabase.AccountEditInfo{
+	err = globals.AccountDatabase.EditAccount(accountID, &accountdatabase.AccountEditInfo{
 		PasswordHash: &hashedPassword,
 	})
 	if err != nil {
@@ -82,7 +76,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 
 	// Resets the flag that this account must set a new password
 	if accounts.AccountMustSetPassword(accInfo.Flags) {
-		err = accountDB.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
+		err = globals.AccountDatabase.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
 		if err != nil {
 			return resp.SetServerError(err)
 		}

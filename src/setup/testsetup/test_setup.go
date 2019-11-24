@@ -4,7 +4,7 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice/accountverificationservicemock"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountmemorydb"
-	"bitbucket.org/calmisland/go-server-account/avatar"
+	"bitbucket.org/calmisland/go-server-account/avatars"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage/memorystorage"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-geoip/geoip/geoipmock"
@@ -21,7 +21,7 @@ func Setup() {
 	// Disable the logging
 	logger.SetLogger(nil)
 
-	setupDatabases()
+	setupAccountDatabase()
 	setupAccessTokenSystems()
 	setupPasswordPolicyValidator()
 	setupPasswordHasher()
@@ -33,8 +33,8 @@ func Setup() {
 	globals.Verify()
 }
 
-func setupDatabases() {
-	accountmemorydb.ActivateDatabase()
+func setupAccountDatabase() {
+	globals.AccountDatabase = accountmemorydb.New()
 }
 
 func setupAccessTokenSystems() {
@@ -85,13 +85,13 @@ func setupGeoIP() {
 
 func setupAvatarStorage() {
 	avatarMemoryStorage := memorystorage.NewStorage()
-	avatarStorageConfig := avatar.StorageConfig{
+	avatarStorageConfig := avatars.StorageConfig{
 		Storage:    avatarMemoryStorage,
 		AvatarPath: "avatars/",
 	}
 
 	var err error
-	globals.AvatarStorage, err = avatar.NewStorage(avatarStorageConfig)
+	globals.AvatarStorage, err = avatars.NewStorage(avatarStorageConfig)
 	if err != nil {
 		panic(err)
 	}

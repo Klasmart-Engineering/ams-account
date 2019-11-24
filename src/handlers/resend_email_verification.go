@@ -6,9 +6,9 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
-	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -35,13 +35,7 @@ func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, 
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
@@ -63,7 +57,7 @@ func HandleResendEmailVerification(_ context.Context, req *apirequests.Request, 
 	}
 
 	// Create the account verification in the database
-	err = accountDB.CreateAccountVerification(accountID, accountdatabase.VerificationTypeEmail, verificationCode)
+	err = globals.AccountDatabase.CreateAccountVerification(accountID, accountdatabase.VerificationTypeEmail, verificationCode)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

@@ -4,7 +4,7 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
-	"bitbucket.org/calmisland/go-server-account/avatar"
+	"bitbucket.org/calmisland/go-server-account/avatars"
 	"bitbucket.org/calmisland/go-server-aws/awsdynamodb"
 	"bitbucket.org/calmisland/go-server-aws/awss3"
 	"bitbucket.org/calmisland/go-server-aws/awssqs"
@@ -20,11 +20,10 @@ import (
 
 // Setup Setup
 func Setup() {
-	if err := awsdynamodb.InitializeFromConfigs(); err != nil {
-		panic(err)
-	}
+	// Setup the Slack reporter first
+	setupSlackReporter()
 
-	setupDatabases()
+	setupAccountDatabase()
 	setupAccessTokenSystems()
 	setupPasswordPolicyValidator()
 	setupPasswordHasher()
@@ -32,13 +31,26 @@ func Setup() {
 	setupGeoIP()
 	setupAvatarStorage()
 	setupAccountVerificationService()
-	setupSlackReporter()
 
 	globals.Verify()
 }
 
-func setupDatabases() {
-	accountdynamodb.ActivateDatabase()
+func setupAccountDatabase() {
+	var accountDatabaseConfig awsdynamodb.ClientConfig
+	err := configs.LoadConfig("account_database_dynamodb", &accountDatabaseConfig, true)
+	if err != nil {
+		panic(err)
+	}
+
+	ddbClient, err := awsdynamodb.NewClient(&accountDatabaseConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	globals.AccountDatabase, err = accountdynamodb.New(ddbClient)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func setupAccessTokenSystems() {
@@ -108,7 +120,7 @@ func setupGeoIP() {
 }
 
 func setupAvatarStorage() {
-	var avatarStorageConfig avatar.StorageConfig
+	var avatarStorageConfig avatars.StorageConfig
 	err := configs.LoadConfig("avatar_storage", &avatarStorageConfig, true)
 	if err != nil {
 		panic(err)
@@ -125,7 +137,7 @@ func setupAvatarStorage() {
 		panic(err)
 	}
 
-	globals.AvatarStorage, err = avatar.NewStorage(avatarStorageConfig)
+	globals.AvatarStorage, err = avatars.NewStorage(avatarStorageConfig)
 	if err != nil {
 		panic(err)
 	}

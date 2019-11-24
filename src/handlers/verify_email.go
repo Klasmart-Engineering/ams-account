@@ -6,9 +6,9 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
-	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
@@ -41,13 +41,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
-	// Get the database
-	accountDB, err := accountdatabase.GetDatabase()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	verificationInfo, err := accountDB.GetAccountVerifications(accountID)
+	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
 		return resp.SetServerError(err)
 	} else if verificationInfo == nil {
@@ -65,7 +59,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}
 
-	err = accountDB.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountEmailVerifiedFlag)
+	err = globals.AccountDatabase.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountEmailVerifiedFlag)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
@@ -92,7 +86,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	}
 
 	// Remove the verification code
-	err = accountDB.RemoveAccountVerification(accountID, accountdatabase.VerificationTypeEmail)
+	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypeEmail)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
