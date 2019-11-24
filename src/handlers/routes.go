@@ -18,6 +18,10 @@ func InitializeRoutes() *apirouter.Router {
 	}
 
 	rootRouter = apirouter.NewRouter()
+	if globals.CORSOptions != nil {
+		rootRouter.AddCORSMiddleware(globals.CORSOptions)
+	}
+
 	routerV1 := createLambdaRouterV1()
 	rootRouter.AddRouter("v1", routerV1)
 	return rootRouter
