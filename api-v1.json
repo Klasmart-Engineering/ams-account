@@ -11,7 +11,7 @@
             "description": "The production API server."
         },
         {
-            "url": "https://test.account.badanamu.net/v1",
+            "url": "https://prod-test.account.badanamu.net/v1",
             "description": "The test production API server."
         },
         {
