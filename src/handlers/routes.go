@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
+	"bitbucket.org/calmisland/go-server-requests/standardhandlers"
 )
 
 var (
@@ -25,7 +26,7 @@ func InitializeRoutes() *apirouter.Router {
 func createLambdaRouterV1() *apirouter.Router {
 	requireAuthMiddleware := authmiddlewares.ValidateSession(globals.AccessTokenValidator, true)
 	router := apirouter.NewRouter()
-	router.AddMethodHandler("GET", "serverinfo", HandleServerInfo)
+	router.AddMethodHandler("GET", "serverinfo", standardhandlers.HandleServerInfo)
 	router.AddMethodHandler("POST", "forgotpassword", HandleForgotPassword)
 	router.AddMethodHandler("POST", "restorepassword", HandleRestorePassword)
 	router.AddMethodHandler("POST", "signup", HandleSignUp)

@@ -1016,6 +1016,75 @@
                     }
                 ]
             }
+        },
+        "/serverinfo": {
+            "get": {
+                "operationId": "getServerInfo",
+                "summary": "Get Server Info",
+                "description": "Gets information about the server.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "X-Calmid-Debug",
+                        "description": "Used to return debug information from the server.",
+                        "example": "enable",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": ["account"],
+                "responses": {
+                    "200": {
+                        "description": "Successfully returned the server information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["region","stage"],
+                                    "properties": {
+                                        "region": {
+                                            "type": "string",
+                                            "description": "The region that the server is hosted in.",
+                                            "example": "oregon"
+                                        },
+                                        "stage": {
+                                            "type": "string",
+                                            "description": "The stage that the server is deployed in.",
+                                            "example": "prod"
+                                        },
+                                        "serviceName": {
+                                            "type": "string",
+                                            "description": "The name of the service.",
+                                            "example": "auth"
+                                        },
+                                        "buildDate": {
+                                            "type": "string",
+                                            "description": "The date the server process was built.",
+                                            "example": "2019-11-25 01:18:00 +KST"
+                                        },
+                                        "buildReleaseName": {
+                                            "type": "string",
+                                            "description": "The name of the build release for the server process.",
+                                            "example": "v1.0.0"
+                                        },
+                                        "gitBranch": {
+                                            "type": "string",
+                                            "description": "The name of the Git branch that built the server process.",
+                                            "example": "prod"
+                                        },
+                                        "gitCommitHash": {
+                                            "type": "string",
+                                            "description": "The Git commit hash that the server process was build from.",
+                                            "example": "a5845227cf7216d440d524f41b5e6b66d72deb8a"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

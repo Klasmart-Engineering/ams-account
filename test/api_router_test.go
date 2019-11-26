@@ -22,10 +22,8 @@ func TestAPIRouter(t *testing.T) {
 
 	rootRouter := handlers.InitializeRoutes()
 	openapi3.TestRouter(t, api, rootRouter, &openapi3.RouterTestingOptions{
-		BasePath: "/v1/",
-		IgnoreResources: []string{
-			"/serverinfo",
-		},
+		BasePath:        "/v1/",
+		IgnoreResources: []string{},
 	})
 
 	logger.SetLogger(backupLogger)
