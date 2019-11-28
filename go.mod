@@ -3,7 +3,7 @@ module bitbucket.org/calmisland/account-lambda-funcs
 go 1.12
 
 require (
-	bitbucket.org/calmisland/go-server-account v1.11.0
+	bitbucket.org/calmisland/go-server-account v1.11.1
 	bitbucket.org/calmisland/go-server-api v0.2.2
 	bitbucket.org/calmisland/go-server-auth v1.1.1
 	bitbucket.org/calmisland/go-server-aws v1.14.0
