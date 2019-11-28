@@ -1,5 +1,5 @@
-bitbucket.org/calmisland/go-server-account v1.11.0 h1:0NWafqEISwcnlFzEbodR+jRWQYTA+v2dj4evw2Yv2tY=
-bitbucket.org/calmisland/go-server-account v1.11.0/go.mod h1:4nflQXToixhHlXocjqZf1PaSuQmgITYWQ6dv4YnPwOQ=
+bitbucket.org/calmisland/go-server-account v1.11.1 h1:WGxXoyNWZ+OHO3Vsfm1U+s6k9iP0XszcfRdmfu2LBRk=
+bitbucket.org/calmisland/go-server-account v1.11.1/go.mod h1:4nflQXToixhHlXocjqZf1PaSuQmgITYWQ6dv4YnPwOQ=
 bitbucket.org/calmisland/go-server-api v0.2.2 h1:9YQDJgf4QBSKjxPxH85BdX4X2oazstGRNjokgzWwUlQ=
 bitbucket.org/calmisland/go-server-api v0.2.2/go.mod h1:T2qOVqHZeTIqow+Mu8LtZUTOrm4WEv/5rWOhXozmqKU=
 bitbucket.org/calmisland/go-server-auth v1.1.1 h1:E9JldfbNoyxpPfn6l+9GRXEVymnQeSzdTXMj1O1zLVU=
