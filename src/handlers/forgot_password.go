@@ -39,7 +39,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 	}
 
 	userEmail := reqBody.Email
-	userPhoneNumber := phoneutils.CleanPhoneNumber(reqBody.PhoneNumber)
+	userPhoneNumber := reqBody.PhoneNumber
 	userLanguage := textutils.SanitizeString(reqBody.Language)
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
@@ -57,7 +57,10 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		userPhoneNumber = ""
 		isUsingEmail = true
 	} else if len(userPhoneNumber) > 0 {
-		if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
+		userPhoneNumber, err = phoneutils.CleanPhoneNumber(userPhoneNumber)
+		if err != nil {
+			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+		} else if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
 			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
