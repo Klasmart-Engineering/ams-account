@@ -12,6 +12,7 @@ import (
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
+	"bitbucket.org/calmisland/go-server-utils/phoneutils"
 )
 
 type restorePasswordRequestBody struct {
@@ -52,19 +53,26 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 				return resp.SetServerError(err)
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
-				return resp.SetClientError(apierrors.ErrorItemNotFound)
+				return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 			}
 
 			accountID = accountIDResult
 		} else if len(reqBody.AccountPhoneNumber) > 0 {
+			accountPhoneNumber, err := phoneutils.CleanPhoneNumber(reqBody.AccountPhoneNumber)
+			if err != nil {
+				return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
+			} else if !phoneutils.IsValidPhoneNumber(accountPhoneNumber) {
+				logger.LogFormat("[RESTOREPW] A restore password request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
+				return resp.SetClientError(apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
+			}
+
 			// Get the account ID from the email
-			accountPhoneNumber := reqBody.AccountPhoneNumber
 			accountIDResult, foundAccount, err := globals.AccountDatabase.GetAccountIDFromPhoneNumber(accountPhoneNumber)
 			if err != nil {
 				return resp.SetServerError(err)
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
-				return resp.SetClientError(apierrors.ErrorItemNotFound)
+				return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 			}
 
 			accountID = accountIDResult
