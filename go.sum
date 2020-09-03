@@ -2,8 +2,8 @@ bitbucket.org/calmisland/go-server-account v1.11.1 h1:WGxXoyNWZ+OHO3Vsfm1U+s6k9i
 bitbucket.org/calmisland/go-server-account v1.11.1/go.mod h1:4nflQXToixhHlXocjqZf1PaSuQmgITYWQ6dv4YnPwOQ=
 bitbucket.org/calmisland/go-server-api v0.2.2 h1:9YQDJgf4QBSKjxPxH85BdX4X2oazstGRNjokgzWwUlQ=
 bitbucket.org/calmisland/go-server-api v0.2.2/go.mod h1:T2qOVqHZeTIqow+Mu8LtZUTOrm4WEv/5rWOhXozmqKU=
-bitbucket.org/calmisland/go-server-auth v1.1.1 h1:E9JldfbNoyxpPfn6l+9GRXEVymnQeSzdTXMj1O1zLVU=
-bitbucket.org/calmisland/go-server-auth v1.1.1/go.mod h1:5/cDB/DPjmBHwB0WBAC1mk3/qV5NjwJcuGWpcFfZk9g=
+bitbucket.org/calmisland/go-server-auth v1.2.0 h1:kIq/BxmEls9QhOk3ppMorMsDOeNnoe6PHG8HfpvSzNg=
+bitbucket.org/calmisland/go-server-auth v1.2.0/go.mod h1:IGgREMcgJleLqcR1BvVmp/jZFMQqq5Ivq2BGvTPFgWI=
 bitbucket.org/calmisland/go-server-aws v1.14.0 h1:UszssGkFrH3i6t52IIpPtuIM9FNNYtzcQg4iTBNIlz4=
 bitbucket.org/calmisland/go-server-aws v1.14.0/go.mod h1:uj4MsWzkebamgpWxzl7V2AU/v8XzUPEO+A/eCsFZoTg=
 bitbucket.org/calmisland/go-server-cloud v0.4.0 h1:Qfc5ZtDPqeHCzNSotHsjBfwoM373AcXO5no3i9vZEJI=
@@ -29,12 +29,10 @@ bitbucket.org/calmisland/go-server-queues v1.0.1 h1:pekU2mv+yvEpojw4sgIz1ej1f3aP
 bitbucket.org/calmisland/go-server-queues v1.0.1/go.mod h1:5Nf1TqYrkjgTEtk4TSWU0SS+TWY4rrDJDqz2vC4cYqs=
 bitbucket.org/calmisland/go-server-requests v1.9.1 h1:+R8denTO7ySNSXYUNKKvwNi8gd0iDegcdLF0JVoNbPQ=
 bitbucket.org/calmisland/go-server-requests v1.9.1/go.mod h1:S2W1oM0yaTXC9ls4TbP4B7eNKCIgPM0PNBuxKPLI8Sw=
-bitbucket.org/calmisland/go-server-requests v1.11.0 h1:/Fxh9a+Of0ox7T1f1LTIeUWxBfi0LF3Scn6AbiJfXeI=
-bitbucket.org/calmisland/go-server-requests v1.11.0/go.mod h1:S2W1oM0yaTXC9ls4TbP4B7eNKCIgPM0PNBuxKPLI8Sw=
 bitbucket.org/calmisland/go-server-requests v1.12.0 h1:TBgEYIK00H8UeWaybkwZ9AFHaPNG2IxJlGKqUqqlJT4=
 bitbucket.org/calmisland/go-server-requests v1.12.0/go.mod h1:S2W1oM0yaTXC9ls4TbP4B7eNKCIgPM0PNBuxKPLI8Sw=
-bitbucket.org/calmisland/go-server-requests v1.14.1 h1:ZQv86uu1IIwtLWAbiu0w/XvLP8WOOkAo/oyg59nOFJQ=
-bitbucket.org/calmisland/go-server-requests v1.14.1/go.mod h1:ln3W/0zMrgJ/6DUjTj5wNkfcf/8Y9+Ec7pUIa6LaQug=
+bitbucket.org/calmisland/go-server-requests v1.20.0 h1:GJ4ZIwKhzqqdSKoaeMfx6xNbKcQhvzdCsxgoU+qT/BQ=
+bitbucket.org/calmisland/go-server-requests v1.20.0/go.mod h1:xW4faoT7cYG3ZMqnG1RHPnCN1r0wWvnIEtq4Fo+0D7s=
 bitbucket.org/calmisland/go-server-security v1.0.1 h1:ZGnGa4JtO0T9UZxIrduo/oz2j1SFL9wEuM5f3OO8V80=
 bitbucket.org/calmisland/go-server-security v1.0.1/go.mod h1:KbuAvr4Q+pYM7HJjryIUTk4xsJ2rCBxb1jKz6+C75Wk=
 bitbucket.org/calmisland/go-server-utils v1.1.0/go.mod h1:5icb47nXPo2GH++D+2DSYnzPIZrlQmQ7Pi7jA+gS2yQ=
@@ -79,6 +77,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
