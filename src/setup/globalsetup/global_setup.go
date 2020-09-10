@@ -1,6 +1,8 @@
 package globalsetup
 
 import (
+	"errors"
+
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase/accountdynamodb"
@@ -61,6 +63,14 @@ func setupAccessTokenSystems() {
 	if err != nil {
 		panic(err)
 	}
+
+	bPublicKey := configs.LoadBinary("account.pub")
+	if bPublicKey == nil {
+		panic(errors.New("the account.pub file is mandatory"))
+	}
+
+	validatorConfig.PublicKey = string(bPublicKey)
+
 	globals.AccessTokenValidator, err = accesstokens.NewValidator(validatorConfig)
 	if err != nil {
 		panic(err)
