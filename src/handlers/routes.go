@@ -24,6 +24,8 @@ func InitializeRoutes() *apirouter.Router {
 
 	routerV1 := createLambdaRouterV1()
 	rootRouter.AddRouter("v1", routerV1)
+	routerV2 := createRouterV2()
+	rootRouter.AddRouter("v2", routerV2)
 	return rootRouter
 }
 
@@ -68,6 +70,16 @@ func createLambdaRouterV1() *apirouter.Router {
 	specificOtherAccountRouter.AddMethodHandler("GET", "info", HandleGetOtherAccountInfo)
 	specificOtherAccountRouter.AddMethodHandler("GET", "avatar", HandleOtherAccountAvatarDownload)
 	otherAccountRouter.AddRouterWildcard("accountId", specificOtherAccountRouter)
+
+	return router
+}
+
+func createRouterV2() *apirouter.Router {
+	router := apirouter.NewRouter()
+	signupRouter := apirouter.NewRouter()
+	signupRouter.AddMethodHandler("POST", "request", HandleSignupRequest)
+	signupRouter.AddMethodHandler("POST", "confirm", HandleSignUpConfirm)
+	router.AddRouter("signup", signupRouter)
 
 	return router
 }

@@ -17,5 +17,6 @@ require (
 	bitbucket.org/calmisland/go-server-utils v1.9.0
 	github.com/calmisland/go-errors v0.9.2
 	github.com/calmisland/go-testify v1.3.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
 )
