@@ -1,2 +1,6 @@
 # executables
 /bin/
+.env
+*.log
+node_modules/
+vendor/
