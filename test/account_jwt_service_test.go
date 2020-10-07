@@ -33,7 +33,7 @@ func TestJwtToken(t *testing.T) {
 	if claims.Email != email {
 		t.Error("Email attribute is incorrect")
 	}
-	if claims.VerificationCode != verificationCode {
+	if claims.VerificationCode != account_jwt_service.EncryptHashedCode(verificationCode) {
 		t.Error("VerificationCode attribute is incorrect")
 	}
 
@@ -41,4 +41,10 @@ func TestJwtToken(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func TestEncryptHashedCode(t *testing.T) {
+	code := "AD1XK7"
+	hashed := account_jwt_service.EncryptHashedCode(code)
+	t.Log(hashed)
 }

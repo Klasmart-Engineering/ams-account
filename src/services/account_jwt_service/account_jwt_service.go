@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -28,13 +29,18 @@ func (token *TokenMapClaims) Valid() error {
 	return nil
 }
 
+func EncryptHashedCode(code string) string {
+	hashedPassword, _ := globals.PasswordHasher.GeneratePasswordHash(code, false)
+	return hashedPassword
+}
+
 func CreateToken(claims *TokenMapClaims) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":            claims.Email,
 		"phoneNr":          claims.PhoneNumber,
 		"pw":               claims.Password,
-		"verificationCode": claims.VerificationCode,
+		"verificationCode": EncryptHashedCode(claims.VerificationCode),
 		"expireAt":         time.Now().Add(time.Minute * 10).Unix(),
 	})
 	secret := []byte(os.Getenv("JWT_SECRET"))
