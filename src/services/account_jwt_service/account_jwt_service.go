@@ -34,6 +34,14 @@ func EncryptHashedCode(code string) string {
 	return hashedPassword
 }
 
+func GetSecret() []byte {
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		return []byte("C@almIsl@nd")
+	}
+	return []byte(jwtSecret)
+}
+
 func CreateToken(claims *TokenMapClaims) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -43,7 +51,7 @@ func CreateToken(claims *TokenMapClaims) (string, error) {
 		"verificationCode": EncryptHashedCode(claims.VerificationCode),
 		"expireAt":         time.Now().Add(time.Minute * 10).Unix(),
 	})
-	secret := []byte(os.Getenv("JWT_SECRET"))
+	secret := GetSecret()
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
 		return "", err
@@ -57,7 +65,7 @@ func VerifyToken(tokenString string) (*TokenMapClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return GetSecret(), nil
 	})
 
 	if err != nil {
