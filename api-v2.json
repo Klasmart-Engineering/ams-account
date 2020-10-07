@@ -1,0 +1,209 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Accounts API",
+        "version": "1.0",
+        "description": "The accounts management RESTful API service."
+    },
+    "servers": [
+        {
+            "url": "https://prod.account.badanamu.net/v1",
+            "description": "The production API server."
+        },
+        {
+            "url": "https://prod-test.account.badanamu.net/v1",
+            "description": "The test production API server."
+        },
+        {
+            "url": "https://beta.account.badanamu.net/v1",
+            "description": "The beta staging API server."
+        },
+        {
+            "url": "https://account.internal.badanamu.net/v1",
+            "description": "The in-house API server."
+        }
+    ],
+    "components": {
+        "schemas": {
+            "APIError": {
+                "type": "object",
+                "description": "An API error.",
+                "required": ["errCode"],
+                "properties": {
+                    "errCode": {
+                        "type": "integer",
+                        "description": "The code of the error."
+                    },
+                    "errName": {
+                        "type": "string",
+                        "description": "The name of the error."
+                    },
+                    "errMessage": {
+                        "type": "string",
+                        "description": "The error message."
+                    },
+                    "errField": {
+                        "type": "string",
+                        "description": "The name of the field that generated the error."
+                    },
+                    "errValue": {
+                        "type": "integer",
+                        "description": "Any value associated with the error."
+                    },
+                    "errParams": {
+                        "type": "object",
+                        "description": "Any parameters associated with the error."
+                    }
+                }
+            }
+        },
+        "responses": {
+            "400BadRequest": {
+                "description": "An input query parameter, part of the URL or the request body is invalid.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/APIError"
+                        }
+                    }
+                }
+            },
+            "401Unauthorized": {
+                "description": "You are not authorized to perform an action or to access a resource. Make sure that you are using a valid access token.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "CIT"
+            }
+        }
+    },
+    "paths": {
+        "/signup/request": {
+            "post": {
+                "operationId": "signuprequest",
+                "summary": "Request for Signup",
+                "description": "Requests to send verification code for signup",
+                "tags": ["account"],
+                "requestBody": {
+                    "description": "The user infos for creating an account",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "required": ["email", "pw", "lang"],
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "description": "The email address",
+                                                "example": "email@example.com"
+                                            },
+                                            "pw": {
+                                                "type": "string",
+                                                "description": "Password",
+                                                "example": "en_US"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "required": ["phoneNr", "pw", "lang"],
+                                        "properties": {
+                                            "phoneNr": {
+                                                "type": "string",
+                                                "description": "The phone number",
+                                                "example": "+14155552671"
+                                            },
+                                            "pw": {
+                                                "type": "string",
+                                                "description": "Password"
+                                            },
+                                            "lang": {
+                                                "type": "string",
+                                                "description": "The language code of the desired communication language.",
+                                                "example": "en_US"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully sent instructions on how to restore the password."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            }
+        },
+        "/signup/confirm": {
+            "post": {
+                "operationId": "signupconfirm",
+                "summary": "Confirm verification for Signup",
+                "description": "Confirm verification codes to complete signup",
+                "tags": ["account"],
+                "requestBody": {
+                    "description": "The user infos for creating an account",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "required": ["verificationToken", "verificationCode"],
+                                        "properties": {
+                                            "verificationToken": {
+                                                "type": "string",
+                                                "description": "verificationToken"
+                                            },
+                                            "verificationCode": {
+                                                "type": "string",
+                                                "description": "verificationCode"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully sent instructions on how to restore the password."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401Unauthorized"
+                    }
+                }
+            }
+        }
+        
+    }
+}

@@ -1,0 +1,37 @@
+=== RUN   TestJwtToken
+--- PASS: TestJwtToken (0.00s)
+=== RUN   TestValidateAPIDefinition
+--- PASS: TestValidateAPIDefinition (0.01s)
+=== RUN   TestAPIRouter
+    router_tester.go:134: There are no tests defined for API function: GET /v1/self/info
+    router_tester.go:134: There are no tests defined for API function: POST /v1/self/info
+    router_tester.go:134: There are no tests defined for API function: POST /v1/self/password
+    router_tester.go:134: There are no tests defined for API function: POST /v1/signup
+    router_tester.go:134: There are no tests defined for API function: GET /v1/other/{accountId}/info
+    router_tester.go:134: There are no tests defined for API function: POST /v1/resend/verification/phonenumber
+    router_tester.go:134: There are no tests defined for API function: POST /v1/resend/verification/email
+    router_tester.go:134: There are no tests defined for API function: POST /v1/restorepassword
+    router_tester.go:134: There are no tests defined for API function: DELETE /v1/self/avatar
+    router_tester.go:134: There are no tests defined for API function: GET /v1/self/avatar
+    router_tester.go:134: There are no tests defined for API function: PUT /v1/self/avatar
+    router_tester.go:134: There are no tests defined for API function: GET /v1/serverinfo
+    router_tester.go:134: There are no tests defined for API function: GET /v1/verify/email
+    router_tester.go:134: There are no tests defined for API function: POST /v1/verify/email
+    router_tester.go:134: There are no tests defined for API function: GET /v1/verify/phonenumber
+    router_tester.go:134: There are no tests defined for API function: POST /v1/verify/phonenumber
+    router_tester.go:134: There are no tests defined for API function: POST /v1/forgotpassword
+    router_tester.go:134: There are no tests defined for API function: GET /v1/other/{accountId}/avatar
+    router_tester.go:98: 
+        	Error Trace:	router_tester.go:98
+        	Error:      	Unable to find API resource
+        	Test:       	TestAPIRouter
+        	Messages:   	The API resource could not be found in the API specification: v2/signup/request
+    router_tester.go:98: 
+        	Error Trace:	router_tester.go:98
+        	Error:      	Unable to find API resource
+        	Test:       	TestAPIRouter
+        	Messages:   	The API resource could not be found in the API specification: v2/signup/confirm
+--- FAIL: TestAPIRouter (0.01s)
+FAIL
+FAIL	bitbucket.org/calmisland/account-lambda-funcs/test	0.455s
+FAIL
