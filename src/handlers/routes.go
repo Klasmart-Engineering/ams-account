@@ -22,12 +22,14 @@ func InitializeRoutes() *apirouter.Router {
 		rootRouter.AddCORSMiddleware(globals.CORSOptions)
 	}
 
-	routerV1 := createLambdaRouterV1()
+	routerV1 := CreateLambdaRouterV1()
 	rootRouter.AddRouter("v1", routerV1)
+	routerV2 := CreateRouterV2()
+	rootRouter.AddRouter("v2", routerV2)
 	return rootRouter
 }
 
-func createLambdaRouterV1() *apirouter.Router {
+func CreateLambdaRouterV1() *apirouter.Router {
 	requireAuthMiddleware := authmiddlewares.ValidateSession(globals.AccessTokenValidator, true)
 	router := apirouter.NewRouter()
 	router.AddMethodHandler("GET", "serverinfo", standardhandlers.HandleServerInfo)
@@ -68,6 +70,16 @@ func createLambdaRouterV1() *apirouter.Router {
 	specificOtherAccountRouter.AddMethodHandler("GET", "info", HandleGetOtherAccountInfo)
 	specificOtherAccountRouter.AddMethodHandler("GET", "avatar", HandleOtherAccountAvatarDownload)
 	otherAccountRouter.AddRouterWildcard("accountId", specificOtherAccountRouter)
+
+	return router
+}
+
+func CreateRouterV2() *apirouter.Router {
+	router := apirouter.NewRouter()
+	signupRouter := apirouter.NewRouter()
+	signupRouter.AddMethodHandler("POST", "request", HandleSignupRequest)
+	signupRouter.AddMethodHandler("POST", "confirm", HandleSignUpConfirm)
+	router.AddRouter("signup", signupRouter)
 
 	return router
 }

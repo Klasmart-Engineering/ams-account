@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
-	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
@@ -18,21 +18,21 @@ import (
 	"github.com/google/uuid"
 )
 
-type signUpRequestBody struct {
+type verifyCodeRequestBody struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNr"`
 	Password    string `json:"pw"`
 	Language    string `json:"lang"`
 }
 
-type signUpResponseBody struct {
-	AccountID string `json:"accountId"`
+type verifyCodeResponseBody struct {
+	VerificationToken string `json:"verificationToken"`
 }
 
 // HandleSignUp handles sign-up requests.
-func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleSignupRequest(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
-	var reqBody signUpRequestBody
+	var reqBody verifyCodeRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
@@ -116,16 +116,6 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	geoIPResult, err := globals.GeoIPService.GetCountryFromIP(clientIP)
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	countryCode := defaultCountryCode
-	if geoIPResult != nil && len(geoIPResult.CountryCode) > 0 {
-		countryCode = geoIPResult.CountryCode
-	}
-
 	// Sets the default language if none is set
 	if !langutils.IsValidLanguageCode(userLanguage) {
 		userLanguage = defaultLanguageCode
@@ -162,33 +152,23 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	var emailVerificationCode string
-	var phoneNumberVerificationCode string
-	if isUsingEmail {
-		emailVerificationCode = verificationCode
-	} else {
-		phoneNumberVerificationCode = verificationCode
-	}
+	logger.LogFormat("[VERIFICATION] A successful verefication request from IP [%s] UserAgent [%s]\n", clientIP, clientUserAgent)
+	logger.LogFormat("[VERIFICATION] Created Verification Code: %s\n", verificationCode)
 
-	err = globals.AccountDatabase.CreateAccount(&accountdatabase.CreateAccountInfo{
-		ID:                          accountID,
-		Email:                       userEmail,
-		PhoneNumber:                 userPhoneNumber,
-		PasswordHash:                hashedPassword,
-		Flags:                       0,
-		EmailVerificationCode:       emailVerificationCode,
-		PhoneNumberVerificationCode: phoneNumberVerificationCode,
-		Country:                     countryCode,
-		Language:                    userLanguage,
+	token, errToken := account_jwt_service.CreateToken(&account_jwt_service.TokenMapClaims{
+		Email:            userEmail,
+		PhoneNumber:      userPhoneNumber,
+		Password:         hashedPassword,
+		Language:         userLanguage,
+		VerificationCode: verificationCode,
 	})
-	if err != nil {
-		return resp.SetServerError(err)
+
+	if errToken != nil {
+		return resp.SetServerError(errToken)
 	}
 
-	logger.LogFormat("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-
-	response := signUpResponseBody{
-		AccountID: accountID,
+	response := verifyCodeResponseBody{
+		VerificationToken: token,
 	}
 	resp.SetBody(&response)
 	return nil

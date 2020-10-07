@@ -4,13 +4,11 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-logs/logger"
-	"bitbucket.org/calmisland/go-server-messages/messages"
-	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
-	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
 	"bitbucket.org/calmisland/go-server-utils/phoneutils"
@@ -18,30 +16,44 @@ import (
 	"github.com/google/uuid"
 )
 
-type signUpRequestBody struct {
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phoneNr"`
-	Password    string `json:"pw"`
-	Language    string `json:"lang"`
+type signUpByTokenRequestBody struct {
+	VerificationToken string `json:"verificationToken"`
+	VerificationCode  string `json:"verificationCode"`
 }
 
-type signUpResponseBody struct {
+type signUpByTokenResponseBody struct {
 	AccountID string `json:"accountId"`
 }
 
 // HandleSignUp handles sign-up requests.
-func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
+func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apirequests.Response) error {
 	// Parse the request body
-	var reqBody signUpRequestBody
+	var reqBody signUpByTokenRequestBody
 	err := req.UnmarshalBody(&reqBody)
 	if err != nil {
 		return resp.SetClientError(apierrors.ErrorBadRequestBody)
 	}
 
-	userEmail := reqBody.Email
-	userPhoneNumber := reqBody.PhoneNumber
-	userPassword := reqBody.Password
-	userLanguage := textutils.SanitizeString(reqBody.Language)
+	verificationToken := reqBody.VerificationToken
+	verificationCode := reqBody.VerificationCode
+	claims, errVerify := account_jwt_service.VerifyToken(verificationToken)
+	if errVerify != nil {
+		return resp.SetServerError(errVerify)
+	}
+
+	if claims.VerificationCode != verificationCode {
+		return resp.SetServerError(apierrors.ErrorInvalidParameters.WithField("verificationCode"))
+	}
+
+	errClaim := claims.Valid()
+	if errClaim != nil {
+		return resp.SetServerError(errClaim)
+	}
+
+	userEmail := claims.Email
+	userPhoneNumber := claims.PhoneNumber
+	userPassword := claims.Password
+	userLanguage := textutils.SanitizeString(claims.Language)
 	clientIP := req.SourceIP
 	clientUserAgent := req.UserAgent
 
@@ -106,11 +118,6 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	accountUUID, err := uuid.NewRandom()
 	if err != nil {
 		return resp.SetServerError(err)
@@ -132,54 +139,15 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 	}
 
 	accountID := accountUUID.String()
-	verificationLink := globals.AccountVerificationService.GetVerificationLink(accountID, verificationCode, userLanguage)
-	var message *messages.Message
-	if isUsingEmail {
-		message = &messages.Message{
-			MessageType: messages.MessageTypeEmail,
-			Priority:    messages.MessagePriorityEmailHigh,
-			Recipient:   userEmail,
-			Language:    userLanguage,
-			Template: &messagetemplates.EmailVerificationTemplate{
-				Code: verificationCode,
-				Link: verificationLink,
-			},
-		}
-	} else {
-		message = &messages.Message{
-			MessageType: messages.MessageTypeSMS,
-			Priority:    messages.MessagePrioritySMSTransactional,
-			Recipient:   userPhoneNumber,
-			Language:    userLanguage,
-			Template: &messagetemplates.PhoneVerificationTemplate{
-				Code: verificationCode,
-			},
-		}
-	}
-
-	err = globals.MessageSendQueue.EnqueueMessage(message)
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
-	var emailVerificationCode string
-	var phoneNumberVerificationCode string
-	if isUsingEmail {
-		emailVerificationCode = verificationCode
-	} else {
-		phoneNumberVerificationCode = verificationCode
-	}
 
 	err = globals.AccountDatabase.CreateAccount(&accountdatabase.CreateAccountInfo{
-		ID:                          accountID,
-		Email:                       userEmail,
-		PhoneNumber:                 userPhoneNumber,
-		PasswordHash:                hashedPassword,
-		Flags:                       0,
-		EmailVerificationCode:       emailVerificationCode,
-		PhoneNumberVerificationCode: phoneNumberVerificationCode,
-		Country:                     countryCode,
-		Language:                    userLanguage,
+		ID:           accountID,
+		Email:        userEmail,
+		PhoneNumber:  userPhoneNumber,
+		PasswordHash: hashedPassword,
+		Flags:        0,
+		Country:      countryCode,
+		Language:     userLanguage,
 	})
 	if err != nil {
 		return resp.SetServerError(err)
@@ -187,7 +155,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 
 	logger.LogFormat("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 
-	response := signUpResponseBody{
+	response := signUpByTokenResponseBody{
 		AccountID: accountID,
 	}
 	resp.SetBody(&response)
