@@ -19,7 +19,6 @@ type TokenMapClaims struct {
 }
 
 func (token *TokenMapClaims) Valid() error {
-	fmt.Println(token.VerificationCode)
 	if token.VerificationCode == "" {
 		return errors.New("Claim does not contain verificationCode")
 	}
