@@ -41,8 +41,10 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 		return resp.SetServerError(errVerify)
 	}
 
-	if claims.VerificationCode != verificationCode {
-		return resp.SetServerError(apierrors.ErrorInvalidParameters.WithField("verificationCode"))
+	// Verify that the current password is correct
+	if !globals.PasswordHasher.VerifyPasswordHash(verificationCode, claims.VerificationCode) { // Verifies the password
+		logger.LogFormat("[SIGNUP CONFIRM] Verification Code [%s] does not match\n", verificationCode)
+		return resp.SetClientError(apierrors.ErrorInvalidPassword)
 	}
 
 	errClaim := claims.Valid()

@@ -4,10 +4,24 @@ import (
 	"testing"
 	"time"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
+	"bitbucket.org/calmisland/go-server-security/passwords"
 )
 
 func TestJwtToken(t *testing.T) {
+	passwordHashConfig := passwords.PasswordHashConfig{
+		DefaultCost: 10,
+		SecureCost:  13,
+	}
+	t.Log(passwordHashConfig)
+	var errNewPwHasher error
+	globals.PasswordHasher, errNewPwHasher = passwords.NewPasswordHasher(passwordHashConfig)
+	if errNewPwHasher != nil {
+		t.Error(errNewPwHasher)
+	}
+	t.Log(globals.PasswordHasher)
+
 	email := "steve.song@calmid.com"
 	phoneNumber := "+821012341234"
 	password := "asdf"
@@ -23,22 +37,32 @@ func TestJwtToken(t *testing.T) {
 		Language:         language,
 		ExpireAt:         expireAt,
 	})
-
 	if err != nil {
 		t.Error(err)
 	}
-
 	claims, err := account_jwt_service.VerifyToken(token)
 
 	if claims.Email != email {
 		t.Error("Email attribute is incorrect")
 	}
-	if claims.VerificationCode != verificationCode {
-		t.Error("VerificationCode attribute is incorrect")
+	t.Log(verificationCode)
+	t.Log(claims.VerificationCode)
+
+	// // Verify that the current password is correct
+	if !globals.PasswordHasher.VerifyPasswordHash(verificationCode, claims.VerificationCode) { // Verifies the password
+		t.Error(`Encrypted code does not match`)
 	}
 
-	if err != nil {
-		t.Error(err)
+}
+
+func TestEncryptHashedCode(t *testing.T) {
+	code := "AD1XK7"
+	encrypted := account_jwt_service.EncryptHashedCode(code)
+	t.Log(encrypted)
+
+	// Verify that the current password is correct
+	if !globals.PasswordHasher.VerifyPasswordHash(code, encrypted) { // Verifies the password
+		t.Error(`Encrypted code does not match`)
 	}
 
 }
