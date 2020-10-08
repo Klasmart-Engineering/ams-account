@@ -6,3 +6,16 @@ services:
       - "8089:8089"
     env_file:
       - .env
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    entrypoint: ["java", "-jar", "/home/dynamodblocal/DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+    ports:
+    - "8000:8000"
+    #Without the -sharedDb it will use {access_key}_us-west-2.db file.
+    #Access key can be set in shell settings,
+    #but the region name is hard-coded as us-west-2
+    #(see source in chrome dev tools, /shell/jsrepl/sandbox.js file).
+
+    
