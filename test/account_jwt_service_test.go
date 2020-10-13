@@ -1,6 +1,7 @@
 package test_test
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -65,4 +66,15 @@ func TestEncryptHashedCode(t *testing.T) {
 		t.Error(`Encrypted code does not match`)
 	}
 
+}
+
+func TestGetSecret(t *testing.T) {
+	jwtSecretEnv := os.Getenv("JWT_SECRET")
+	secret := account_jwt_service.GetSecret()
+	t.Log(string(secret))
+	if jwtSecretEnv == "" && string(secret) == "C@almIsl@nd" {
+		t.Log(`default jwt secret`)
+	} else if string(secret) != jwtSecretEnv {
+		t.Error(`could not get jwt secret`)
+	}
 }
