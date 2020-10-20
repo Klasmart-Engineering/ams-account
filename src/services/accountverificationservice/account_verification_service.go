@@ -1,7 +1,9 @@
 package accountverificationservice
 
 import (
+	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/calmisland/go-errors"
@@ -25,9 +27,10 @@ type standardService struct {
 }
 
 const (
-	accountIDParamName        = "{accountId}"
-	verificationCodeParamName = "{code}"
-	languageParamName         = "{language}"
+	accountIDParamName         = "{accountId}"
+	verificationCodeParamName  = "{code}"
+	languageParamName          = "{language}"
+	verificationTokenParamName = "{verificationToken}"
 )
 
 // New creates a new account verification service.
@@ -63,6 +66,23 @@ func (service *standardService) GetVerificationLink(accountID, verificationCode,
 	if service.hasLanguageParam {
 		linkURL = strings.ReplaceAll(linkURL, languageParamName, language)
 	}
+
+	return linkURL
+}
+
+func GetVerificationLinkByToken(verificationToken string, verificationCode string, language string) string {
+
+	host := os.Getenv("HOST_PASS_FRONTAPP")
+	path := fmt.Sprintf(`/#/verify_email_with_token?verificationToken=%s&code=%s&lang=%s`, verificationTokenParamName, verificationCodeParamName, languageParamName)
+
+	verificationToken = url.QueryEscape(verificationToken)
+	verificationCode = url.QueryEscape(verificationCode)
+	language = url.QueryEscape(language)
+
+	linkURL := host + path
+	linkURL = strings.ReplaceAll(linkURL, verificationTokenParamName, verificationToken)
+	linkURL = strings.ReplaceAll(linkURL, verificationCodeParamName, verificationCode)
+	linkURL = strings.ReplaceAll(linkURL, languageParamName, language)
 
 	return linkURL
 }

@@ -5,6 +5,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
@@ -15,7 +16,6 @@ import (
 	"bitbucket.org/calmisland/go-server-utils/langutils"
 	"bitbucket.org/calmisland/go-server-utils/phoneutils"
 	"bitbucket.org/calmisland/go-server-utils/textutils"
-	"github.com/google/uuid"
 )
 
 type verifyCodeRequestBody struct {
@@ -111,18 +111,20 @@ func HandleSignupRequest(_ context.Context, req *apirequests.Request, resp *apir
 		return resp.SetServerError(err)
 	}
 
-	accountUUID, err := uuid.NewRandom()
-	if err != nil {
-		return resp.SetServerError(err)
-	}
-
 	// Sets the default language if none is set
 	if !langutils.IsValidLanguageCode(userLanguage) {
 		userLanguage = defaultLanguageCode
 	}
 
-	accountID := accountUUID.String()
-	verificationLink := globals.AccountVerificationService.GetVerificationLink(accountID, verificationCode, userLanguage)
+	token, errToken := account_jwt_service.CreateToken(&account_jwt_service.TokenMapClaims{
+		Email:            userEmail,
+		PhoneNumber:      userPhoneNumber,
+		Password:         hashedPassword,
+		Language:         userLanguage,
+		VerificationCode: verificationCode,
+	})
+
+	verificationLink := accountverificationservice.GetVerificationLinkByToken(token, verificationCode, userLanguage)
 	var message *messages.Message
 	if isUsingEmail {
 		message = &messages.Message{
@@ -152,16 +154,8 @@ func HandleSignupRequest(_ context.Context, req *apirequests.Request, resp *apir
 		return resp.SetServerError(err)
 	}
 
-	logger.LogFormat("[VERIFICATION] A successful verefication request from IP [%s] UserAgent [%s]\n", clientIP, clientUserAgent)
+	logger.LogFormat("[VERIFICATION] A successful verification request from IP [%s] UserAgent [%s]\n", clientIP, clientUserAgent)
 	logger.LogFormat("[VERIFICATION] Created Verification Code: %s\n", verificationCode)
-
-	token, errToken := account_jwt_service.CreateToken(&account_jwt_service.TokenMapClaims{
-		Email:            userEmail,
-		PhoneNumber:      userPhoneNumber,
-		Password:         hashedPassword,
-		Language:         userLanguage,
-		VerificationCode: verificationCode,
-	})
 
 	if errToken != nil {
 		return resp.SetServerError(errToken)
