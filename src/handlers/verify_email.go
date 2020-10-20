@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -69,7 +70,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	userEmail := verificationInfo.Email
 	userLanguage := verificationInfo.Language
 	if len(userLanguage) == 0 {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	// Send the welcome email

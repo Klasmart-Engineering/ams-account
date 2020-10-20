@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -51,7 +52,7 @@ func HandleResendPhoneNumberVerification(_ context.Context, req *apirequests.Req
 	logger.LogFormat("[RESENDVERIFY] A successful resend phone number verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 
 	// Generate a new verification code
-	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)
+	verificationCode, err := securitycodes.GenerateSecurityCode(handlers_common.SignUpVerificationCodeByteLength)
 	if err != nil {
 		return resp.SetServerError(err)
 	}

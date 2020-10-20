@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -67,7 +68,7 @@ func HandleVerifyPhoneNumber(_ context.Context, req *apirequests.Request, resp *
 	userPhoneNumber := verificationInfo.PhoneNumber
 	userLanguage := verificationInfo.Language
 	if len(userLanguage) == 0 {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	// TODO: Do we want to send a welcome SMS?

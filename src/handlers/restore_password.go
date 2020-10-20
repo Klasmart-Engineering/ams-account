@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -95,7 +96,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(password)
 	if err != nil {
-		return handlePasswordValidatorError(resp, err)
+		return handlers_common.HandlePasswordValidatorError(resp, err)
 	}
 
 	logger.LogFormat("[RESTOREPW] A successful restore password request for account [%s] using a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
@@ -134,7 +135,7 @@ func HandleRestorePassword(_ context.Context, req *apirequests.Request, resp *ap
 
 	// Sets the default language if none is set
 	if len(userLanguage) == 0 {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	// TODO: Do we want to send SMS for this if there is no available email address?
