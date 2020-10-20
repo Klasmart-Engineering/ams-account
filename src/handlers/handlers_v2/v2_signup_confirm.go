@@ -8,6 +8,8 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-logs/logger"
+	"bitbucket.org/calmisland/go-server-messages/messages"
+	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
@@ -157,6 +159,21 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 	}
 
 	logger.LogFormat("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
+
+	// send welcome email
+	if len(userEmail) > 0 {
+		emailMessage := &messages.Message{
+			MessageType: messages.MessageTypeEmail,
+			Priority:    messages.MessagePriorityEmailNormal,
+			Recipient:   userEmail,
+			Language:    userLanguage,
+			Template:    &messagetemplates.WelcomeTemplate{},
+		}
+		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
+		if err != nil {
+			return resp.SetServerError(err)
+		}
+	}
 
 	response := signUpByTokenResponseBody{
 		AccountID: accountID,
