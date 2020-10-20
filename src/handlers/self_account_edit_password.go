@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -39,7 +40,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(newPassword)
 	if err != nil {
-		return handlePasswordValidatorError(resp, err)
+		return handlers_common.HandlePasswordValidatorError(resp, err)
 	}
 
 	// Get the account information
@@ -87,7 +88,7 @@ func HandleEditSelfAccountPassword(_ context.Context, req *apirequests.Request, 
 
 	// Sets the default language if none is set
 	if len(userLanguage) == 0 {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	// TODO: Do we want to send SMS for this if there is no available email address?

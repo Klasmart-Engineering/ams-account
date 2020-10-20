@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -74,7 +75,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 
 	// Sets the default language if none is set
 	if !langutils.IsValidLanguageCode(userLanguage) {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	var accountID string
@@ -124,7 +125,7 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		// Override the user language based on the database record
 		userLanguage = accInfo.Language
 		if len(userLanguage) == 0 {
-			userLanguage = defaultLanguageCode
+			userLanguage = handlers_common.DefaultLanguageCode
 		}
 
 		template := &messagetemplates.PasswordResetTemplate{

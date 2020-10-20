@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
@@ -78,7 +79,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(userPassword)
 	if err != nil {
-		return handlePasswordValidatorError(resp, err)
+		return handlers_common.HandlePasswordValidatorError(resp, err)
 	}
 
 	if isUsingEmail {
@@ -106,7 +107,7 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	verificationCode, err := securitycodes.GenerateSecurityCode(signUpVerificationCodeByteLength)
+	verificationCode, err := securitycodes.GenerateSecurityCode(handlers_common.SignUpVerificationCodeByteLength)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
@@ -121,14 +122,14 @@ func HandleSignUp(_ context.Context, req *apirequests.Request, resp *apirequests
 		return resp.SetServerError(err)
 	}
 
-	countryCode := defaultCountryCode
+	countryCode := handlers_common.DefaultCountryCode
 	if geoIPResult != nil && len(geoIPResult.CountryCode) > 0 {
 		countryCode = geoIPResult.CountryCode
 	}
 
 	// Sets the default language if none is set
 	if !langutils.IsValidLanguageCode(userLanguage) {
-		userLanguage = defaultLanguageCode
+		userLanguage = handlers_common.DefaultLanguageCode
 	}
 
 	accountID := accountUUID.String()

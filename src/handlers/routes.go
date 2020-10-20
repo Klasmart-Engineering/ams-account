@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_v2"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
 	"bitbucket.org/calmisland/go-server-requests/standardhandlers"
@@ -77,8 +78,8 @@ func CreateLambdaRouterV1() *apirouter.Router {
 func CreateRouterV2() *apirouter.Router {
 	router := apirouter.NewRouter()
 	signupRouter := apirouter.NewRouter()
-	signupRouter.AddMethodHandler("POST", "request", HandleSignupRequest)
-	signupRouter.AddMethodHandler("POST", "confirm", HandleSignUpConfirm)
+	signupRouter.AddMethodHandler("POST", "request", handlers_v2.HandleSignupRequest)
+	signupRouter.AddMethodHandler("POST", "confirm", handlers_v2.HandleSignUpConfirm)
 	router.AddRouter("signup", signupRouter)
 
 	return router
