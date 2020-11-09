@@ -3,6 +3,7 @@ package handlers_v2
 import (
 	"context"
 
+	"bitbucket.org/calmisland/account-lambda-funcs/src/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
@@ -45,7 +46,10 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 	}
 
 	// Verify that the current password is correct
-	if !globals.PasswordHasher.VerifyPasswordHash(verificationCode, claims.VerificationCode) { // Verifies the password
+	if defs.EnsureTestVerificationCode(verificationCode) == true {
+		// pass it
+		logger.LogFormat("[SIGNUP CONFIRM] USE_TEST_VERIFICATION_CODE and verification code matches %s\n", defs.TEST_VERIFICATION_CODE)
+	} else if !globals.PasswordHasher.VerifyPasswordHash(verificationCode, claims.VerificationCode) { // Verifies the password
 		logger.LogFormat("[SIGNUP CONFIRM] Verification Code [%s] does not match\n", verificationCode)
 		return resp.SetClientError(apierrors.ErrorInvalidVerificationCode)
 	}

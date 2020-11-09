@@ -10,6 +10,7 @@ require (
 	bitbucket.org/calmisland/go-server-cloud v0.4.0
 	bitbucket.org/calmisland/go-server-configs v1.1.3
 	bitbucket.org/calmisland/go-server-geoip v1.0.2
+	bitbucket.org/calmisland/go-server-info v1.0.0
 	bitbucket.org/calmisland/go-server-logs v1.2.1
 	bitbucket.org/calmisland/go-server-messages v1.0.0
 	bitbucket.org/calmisland/go-server-requests v1.20.1
