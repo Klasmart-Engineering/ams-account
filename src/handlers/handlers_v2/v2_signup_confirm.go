@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/src/handlers/handlers_common"
 	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
@@ -102,6 +103,7 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 		return handlers_common.HandlePasswordValidatorError(resp, err)
 	}
 
+	var flags int32 = 0
 	if isUsingEmail {
 		// Check if the email is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
@@ -111,6 +113,7 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorEmailAlreadyUsed)
 		}
+		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountEmailVerifiedFlag)
 	} else {
 		// Check if the phone number is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithPhoneNumber(userPhoneNumber)
@@ -120,11 +123,7 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return resp.SetClientError(apierrors.ErrorPhoneNumberAlreadyUsed)
 		}
-	}
-
-	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
-	if err != nil {
-		return resp.SetServerError(err)
+		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountPhoneNumberVerifiedFlag)
 	}
 
 	accountUUID, err := uuid.NewRandom()
@@ -153,8 +152,8 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 		ID:           accountID,
 		Email:        userEmail,
 		PhoneNumber:  userPhoneNumber,
-		PasswordHash: hashedPassword,
-		Flags:        0,
+		PasswordHash: userPassword,
+		Flags:        flags,
 		Country:      countryCode,
 		Language:     userLanguage,
 	})
