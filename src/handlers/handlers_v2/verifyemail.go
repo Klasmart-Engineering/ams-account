@@ -13,7 +13,7 @@ type verifyEmailReqBody struct {
 }
 
 type verifyEmailRespBody struct {
-	Verified bool `json:"verified"`
+	Result bool `json:"result"`
 }
 
 // HandleSignUp handles sign-up requests.
@@ -33,7 +33,7 @@ func HandleVerifyEmail(_ context.Context, req *apirequests.Request, resp *apireq
 	}
 
 	response := verifyEmailRespBody{
-		Verified: ok,
+		Result: ok,
 	}
 
 	resp.SetBody(&response)
