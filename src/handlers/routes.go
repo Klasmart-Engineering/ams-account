@@ -82,5 +82,9 @@ func CreateRouterV2() *apirouter.Router {
 	signupRouter.AddMethodHandler("POST", "confirm", handlers_v2.HandleSignUpConfirm)
 	router.AddRouter("signup", signupRouter)
 
+	verifyRouter := apirouter.NewRouter()
+	verifyRouter.AddMethodHandler("POST", "email", handlers_v2.HandleVerifyEmail)
+	router.AddRouter("verify", verifyRouter)
+
 	return router
 }
