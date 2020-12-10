@@ -103,6 +103,8 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
 			return resp.SetClientError(apierrors.ErrorEmailNotVerified)
 		}
+	} else {
+		return resp.SetClientError(apierrors.ErrorAccountNotFound)
 	}
 
 	if accInfo != nil {

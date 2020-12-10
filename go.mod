@@ -15,18 +15,19 @@ require (
 	bitbucket.org/calmisland/go-server-logs v1.2.2
 	bitbucket.org/calmisland/go-server-messages v1.3.0
 	bitbucket.org/calmisland/go-server-queues v1.0.2 // indirect
-	bitbucket.org/calmisland/go-server-requests v1.20.1
+	bitbucket.org/calmisland/go-server-requests v1.20.2
 	bitbucket.org/calmisland/go-server-security v1.1.0
 	bitbucket.org/calmisland/go-server-utils v1.9.1
 	bitbucket.org/calmisland/go-slack v0.2.2 // indirect
 	github.com/aws/aws-lambda-go v1.20.0 // indirect
-	github.com/aws/aws-sdk-go v1.35.36 // indirect
+	github.com/aws/aws-sdk-go v1.36.5 // indirect
 	github.com/calmisland/go-errors v0.9.2
 	github.com/calmisland/go-testify v1.3.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.2
-	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
+	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
+	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
