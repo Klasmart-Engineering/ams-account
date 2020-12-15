@@ -55,6 +55,8 @@ bitbucket.org/calmisland/go-server-requests v1.20.2 h1:dWI5JAA6KQOQKZBfQknTb5jrC
 bitbucket.org/calmisland/go-server-requests v1.20.2/go.mod h1:xW4faoT7cYG3ZMqnG1RHPnCN1r0wWvnIEtq4Fo+0D7s=
 bitbucket.org/calmisland/go-server-requests v1.20.3 h1:E61IIS/wsMbyWDR74XYkF6s6pIovyQ9oUOHc7szKWJc=
 bitbucket.org/calmisland/go-server-requests v1.20.3/go.mod h1:xW4faoT7cYG3ZMqnG1RHPnCN1r0wWvnIEtq4Fo+0D7s=
+bitbucket.org/calmisland/go-server-requests v1.20.4 h1:yN3guHUlFHVmbqQSKao7N+mueHHCQPbmOPNsEb41ZqI=
+bitbucket.org/calmisland/go-server-requests v1.20.4/go.mod h1:xW4faoT7cYG3ZMqnG1RHPnCN1r0wWvnIEtq4Fo+0D7s=
 bitbucket.org/calmisland/go-server-security v1.0.1 h1:ZGnGa4JtO0T9UZxIrduo/oz2j1SFL9wEuM5f3OO8V80=
 bitbucket.org/calmisland/go-server-security v1.0.1/go.mod h1:KbuAvr4Q+pYM7HJjryIUTk4xsJ2rCBxb1jKz6+C75Wk=
 bitbucket.org/calmisland/go-server-security v1.1.0 h1:aDTQnnbdWfhLlawBjjP6Tn0eN/HnIjaAqo1xRwGRRZE=
@@ -95,6 +97,8 @@ github.com/aws/aws-sdk-go v1.36.5 h1:SouM2ar1A8f+3DYWW622sDdqkkZAO3ha4j8GQjiPLFg
 github.com/aws/aws-sdk-go v1.36.5/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.36.7 h1:XoJPAjKoqvdL531XGWxKYn5eGX/xMoXzMN5fBtoyfSY=
 github.com/aws/aws-sdk-go v1.36.7/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.36.8 h1:3nvY3Ax2RC6PN1i0OKppxjq3doHWqiYtvenLQ/oZ5jI=
+github.com/aws/aws-sdk-go v1.36.8/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/calmisland/go-difflib v1.0.1 h1:tfci468YtnjTC0pUOKRmnmpImkC2Z9siy4z94XM9bM0=
 github.com/calmisland/go-difflib v1.0.1/go.mod h1:xvL8JWRWveQaQ9qymwmu4Rq05T5HzvHMqHtWi6eVUhI=
 github.com/calmisland/go-errors v0.9.2 h1:g0Ddzr5czzrJic5dUXketjrMBD30qnZ+gePicskpKVQ=

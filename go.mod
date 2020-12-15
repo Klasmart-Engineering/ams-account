@@ -15,12 +15,12 @@ require (
 	bitbucket.org/calmisland/go-server-logs v1.2.2
 	bitbucket.org/calmisland/go-server-messages v1.3.0
 	bitbucket.org/calmisland/go-server-queues v1.0.2 // indirect
-	bitbucket.org/calmisland/go-server-requests v1.20.3
+	bitbucket.org/calmisland/go-server-requests v1.20.4
 	bitbucket.org/calmisland/go-server-security v1.1.0
 	bitbucket.org/calmisland/go-server-utils v1.9.1
 	bitbucket.org/calmisland/go-slack v0.2.2 // indirect
 	github.com/aws/aws-lambda-go v1.20.0 // indirect
-	github.com/aws/aws-sdk-go v1.36.7 // indirect
+	github.com/aws/aws-sdk-go v1.36.8 // indirect
 	github.com/calmisland/go-errors v0.9.2
 	github.com/calmisland/go-testify v1.3.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

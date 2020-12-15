@@ -43,8 +43,11 @@ func HandleSignUpConfirm(_ context.Context, req *apirequests.Request, resp *apir
 	verificationCode := reqBody.VerificationCode
 	claims, errVerify := account_jwt_service.VerifyToken(verificationToken)
 	if errVerify != nil {
-		if errVerify.Error() == "Token is expired." { // jwt module returns this text
+		errStr := errVerify.Error()
+		if errStr == "Token is expired." { // jwt module returns this text
 			return resp.SetClientError(apierrors.ErrorExpiredVerificationToken)
+		} else if errStr == "signature is invalid" {
+			return resp.SetClientError(apierrors.ErrorInvalidSignature)
 		}
 		return resp.SetServerError(errVerify)
 	}
