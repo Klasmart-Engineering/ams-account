@@ -135,7 +135,6 @@ func HandleForgotPassword(_ context.Context, req *apirequests.Request, resp *api
 		}
 
 		if isUsingEmail {
-			userEmail = accInfo.Email
 			err = sendForgotPasswordEmailFound(userEmail, userLanguage, template)
 			if err != nil {
 				return resp.SetServerError(err)
