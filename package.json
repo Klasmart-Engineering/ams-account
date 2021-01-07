@@ -12,7 +12,7 @@
     "build": "go build -o ./bin/main ./src/dev_main.go ./src/dev_routes.go",
     "docker-build": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/main ./src/dev_main.go ./src/dev_routes.go && docker-compose build",
     "docker-compose-up": "yarn docker-build && docker-compose up",
-    "run:dev": "go run ./src/dev_main.go ./src/dev_routes.go"
+    "run:dev": "godotenv go run ./src/dev_main.go ./src/dev_routes.go"
   },
   "repository": {
     "type": "git",

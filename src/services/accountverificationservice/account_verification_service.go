@@ -18,7 +18,7 @@ type Service interface {
 // Config is the configuration for the account verification service.
 type Config struct {
 	// URL is the URL for the account verification.
-	URL string `json:"url"`
+	URL string `json:"url" env:"ACCOUNT_VERIFICATION_URL"`
 }
 
 type standardService struct {

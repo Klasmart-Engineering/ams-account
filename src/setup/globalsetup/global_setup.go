@@ -41,7 +41,7 @@ func Setup() {
 
 func setupAccountDatabase() {
 	var accountDatabaseConfig awsdynamodb.ClientConfig
-	err := configs.LoadConfig("account_database_dynamodb", &accountDatabaseConfig, true)
+	err := configs.ReadEnvConfig(&accountDatabaseConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func setupAccountDatabase() {
 
 func setupAccessTokenSystems() {
 	var validatorConfig accesstokens.ValidatorConfig
-	err := configs.LoadConfig("access_tokens", &validatorConfig, true)
+	err := configs.ReadEnvConfig(&validatorConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +92,7 @@ func setupPasswordPolicyValidator() {
 
 func setupPasswordHasher() {
 	var passwordHashConfig passwords.PasswordHashConfig
-	err := configs.LoadConfig("password_hash", &passwordHashConfig, true)
+	err := configs.ReadEnvConfig(&passwordHashConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +105,7 @@ func setupPasswordHasher() {
 
 func setupMessageQueue() {
 	var queueConfig awssqs.QueueConfig
-	err := configs.LoadConfig("message_send_sqs", &queueConfig, true)
+	err := configs.ReadEnvConfig(&queueConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -133,13 +133,13 @@ func setupGeoIP() {
 
 func setupAvatarStorage() {
 	var avatarStorageConfig avatars.StorageConfig
-	err := configs.LoadConfig("avatar_storage", &avatarStorageConfig, true)
+	err := configs.ReadEnvConfig(&avatarStorageConfig)
 	if err != nil {
 		panic(err)
 	}
 
 	var s3StorageConfig awss3.StorageConfig
-	err = configs.LoadConfig("avatar_storage_s3", &s3StorageConfig, true)
+	err = configs.ReadEnvConfig(&s3StorageConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -157,7 +157,7 @@ func setupAvatarStorage() {
 
 func setupAccountVerificationService() {
 	var accountVerificationConfig accountverificationservice.Config
-	err := configs.LoadConfig("account_verification", &accountVerificationConfig, true)
+	err := configs.ReadEnvConfig(&accountVerificationConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -174,13 +174,12 @@ func setupCORS() {
 	if err != nil {
 		panic(err)
 	}
-
 	globals.CORSOptions = &corsConfig
 }
 
 func setupSlackReporter() {
 	var slackReporterConfig slackreporter.Config
-	err := configs.LoadConfig("error_reporter_slack", &slackReporterConfig, false)
+	err := configs.ReadEnvConfig(&slackReporterConfig)
 	if err != nil {
 		panic(err)
 	}
