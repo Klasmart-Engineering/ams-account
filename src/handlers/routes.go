@@ -86,5 +86,9 @@ func CreateRouterV2() *apirouter.Router {
 	verifyRouter.AddMethodHandler("POST", "email", handlers_v2.HandleVerifyEmail)
 	router.AddRouter("verify", verifyRouter)
 
+	kl15MigrationRouter := apirouter.NewRouter()
+	kl15MigrationRouter.AddMethodHandler("POST", "migrate", handlers_v2.HandleKl15Migration)
+	router.AddRouter("kl15", kl15MigrationRouter)
+
 	return router
 }
