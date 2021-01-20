@@ -74,15 +74,8 @@ func HandleKl15Migration(_ context.Context, req *apirequests.Request, resp *apir
 		return resp.SetClientError(apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
-	// Get account from account_kl_1dot5 table
-	kl15AccId, found, err := globals.AccountDatabase.GetAccountsKl1dot5IdFromEmail(userEmail)
-	var kl15AccInfo *accountdatabase.AccountsKl1dot5Info
-	if found || err != nil {
-		kl15AccInfo, err = globals.AccountDatabase.GetAccountsKl1dot5InfoById(kl15AccId)
-		if err != nil {
-			return resp.SetClientError(apierrors.ErrorAccountNotFound)
-		}
-	} else {
+	kl15AccInfo, found, err := globals.AccountDatabase.GetAccountsMigrationKl1dot5InfoFromEmail(userEmail)
+	if !found || err != nil {
 		return resp.SetClientError(apierrors.ErrorAccountNotFound)
 	}
 
@@ -170,7 +163,7 @@ func HandleKl15Migration(_ context.Context, req *apirequests.Request, resp *apir
 
 	logger.LogFormat("[KL1.5-MIGRATION] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 
-	err = globals.AccountDatabase.SetAccountsKl1dot5MigrationStatus(kl15AccId, accountdatabase.AccountsKl1dot5MigrationStatusDone)
+	err = globals.AccountDatabase.SetAccountsMigrationKl1dot5MigrationStatus(userEmail, accountdatabase.AccountsKl1dot5MigrationStatusDone)
 	if err != nil {
 		return resp.SetServerError(err)
 	}
