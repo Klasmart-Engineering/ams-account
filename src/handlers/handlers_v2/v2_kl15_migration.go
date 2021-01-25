@@ -86,11 +86,24 @@ func HandleKl15Migration(_ context.Context, req *apirequests.Request, resp *apir
 		})
 		return nil
 	}
+
 	// Check password
 	isPassed := passwords.ValidateSha3_512_Password(userPassword, &passwords.Sha3_512_Hash{
 		Hash:   kl15AccInfo.PwHash,
 		Secret: kl15AccInfo.PwHashSecret,
 	})
+
+	// Check if this account is in AMS without migration status
+	accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+
+	// Override 1.5 password if account is in AMS AND Password is correct AND MigrationStatus is not done
+	if accountExists && isPassed && kl15AccInfo.MigrationStatus != accountdatabase.AccountsKl1dot5MigrationStatusDone {
+		return overridePasswordToExistingAccount(resp, userEmail, userPassword)
+	}
+
 	if !isPassed {
 		return resp.SetClientError(apierrors.ErrorInvalidPassword)
 	}
@@ -172,5 +185,40 @@ func HandleKl15Migration(_ context.Context, req *apirequests.Request, resp *apir
 		Status: "ok",
 	}
 	resp.SetBody(&response)
+	return nil
+}
+
+func overridePasswordToExistingAccount(resp *apirequests.Response, userEmail string, userPassword string) error {
+	//override and return
+	accountIDResult, _, err := globals.AccountDatabase.GetAccountIDFromEmail(userEmail)
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+	// generate AMS hashed password
+	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+
+	// Change the password
+	err = globals.AccountDatabase.EditAccount(accountIDResult, &accountdatabase.AccountEditInfo{
+		PasswordHash: &hashedPassword,
+	})
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+
+	// update migration Status to done
+	err = globals.AccountDatabase.SetAccountsMigrationKl1dot5MigrationStatus(userEmail, accountdatabase.AccountsKl1dot5MigrationStatusDone)
+	if err != nil {
+		return resp.SetServerError(err)
+	}
+
+	response := kl15MigrationResponseBody{
+		Status: "ok",
+	}
+	resp.SetBody(&response)
+
+	logger.LogFormat("[KL1.5-MIGRATION] Override password using 1.5 [%s] \n", userEmail)
 	return nil
 }
