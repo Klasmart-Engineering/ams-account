@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/src/globals"
-	"bitbucket.org/calmisland/account-lambda-funcs/src/services/account_jwt_service"
+	"bitbucket.org/calmisland/account-lambda-funcs/pkg/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/pkg/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 )
 

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/src/services/accountverificationservice"
+	"bitbucket.org/calmisland/account-lambda-funcs/pkg/services/accountverificationservice"
 )
 
 func TestVerificationLinkByVerificationToken(t *testing.T) {
