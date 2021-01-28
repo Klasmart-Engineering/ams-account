@@ -3,10 +3,9 @@
 package main
 
 import (
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/handlers"
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/setup/globalsetup"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/routers"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/setup/globalsetup"
 	"bitbucket.org/calmisland/go-server-configs/configs"
-	"bitbucket.org/calmisland/go-server-requests/apiservers/httpserver"
 )
 
 func main() {
@@ -16,15 +15,9 @@ func main() {
 	}
 
 	globalsetup.Setup()
-	rootRouter := handlers.InitializeRoutes()
 
-	restServer := &httpserver.Server{
-		ListenAddress: ":8089",
-		Handler:       rootRouter,
-	}
+	echo := routers.SetupRouter()
 
-	err = restServer.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
+	// Start server
+	echo.Logger.Fatal(echo.Start(":8089"))
 }

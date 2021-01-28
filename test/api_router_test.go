@@ -3,9 +3,9 @@ package test_test
 import (
 	"testing"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/globals"
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/handlers"
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/setup/testsetup"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/handlers"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/setup/testsetup"
 	"bitbucket.org/calmisland/go-server-api/openapi/openapi3"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apirouter"

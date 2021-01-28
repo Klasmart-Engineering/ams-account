@@ -3,8 +3,8 @@
 package main
 
 import (
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/handlers"
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/setup/globalsetup"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/handlers"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/setup/globalsetup"
 	"bitbucket.org/calmisland/go-server-aws/awslambda"
 	"bitbucket.org/calmisland/go-server-configs/configs"
 )

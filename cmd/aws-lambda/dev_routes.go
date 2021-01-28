@@ -5,7 +5,7 @@ package main
 import (
 	"context"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/pkg/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
 )
