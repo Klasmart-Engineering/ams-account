@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -99,7 +100,7 @@ func HandleKl15Migration(c echo.Context) error {
 	// Check if this account is in AMS without migration status
 	accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Override 1.5 password if account is in AMS AND Password is correct AND MigrationStatus is not done
@@ -114,7 +115,7 @@ func HandleKl15Migration(c echo.Context) error {
 	// generate AMS hashed password
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// NOTE: Password validator skipped because KL 1.5 password policy is unknown
@@ -124,7 +125,7 @@ func HandleKl15Migration(c echo.Context) error {
 		// Check if the email is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailAlreadyUsed)
@@ -134,7 +135,7 @@ func HandleKl15Migration(c echo.Context) error {
 		// Check if the phone number is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
@@ -144,12 +145,12 @@ func HandleKl15Migration(c echo.Context) error {
 
 	accountUUID, err := uuid.NewRandom()
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	geoIPResult, err := globals.GeoIPService.GetCountryFromIP(clientIP)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	countryCode := defs.DefaultCountryCode
@@ -174,14 +175,14 @@ func HandleKl15Migration(c echo.Context) error {
 		Language:     userLanguage,
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[KL1.5-MIGRATION] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 
 	err = globals.AccountDatabase.SetAccountsMigrationKl1dot5MigrationStatus(userEmail, accountdatabase.AccountsKl1dot5MigrationStatusDone)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := kl15MigrationResponseBody{
@@ -195,12 +196,12 @@ func overridePasswordToExistingAccount(c echo.Context, userEmail string, userPas
 	//override and return
 	accountIDResult, _, err := globals.AccountDatabase.GetAccountIDFromEmail(userEmail)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 	// generate AMS hashed password
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Change the password
@@ -208,13 +209,13 @@ func overridePasswordToExistingAccount(c echo.Context, userEmail string, userPas
 		PasswordHash: &hashedPassword,
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// update migration Status to done
 	err = globals.AccountDatabase.SetAccountsMigrationKl1dot5MigrationStatus(userEmail, accountdatabase.AccountsKl1dot5MigrationStatusDone)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := kl15MigrationResponseBody{

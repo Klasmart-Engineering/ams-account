@@ -7,11 +7,14 @@ import (
 	"time"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/timeutils"
+	"github.com/getsentry/sentry-go"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,6 +44,16 @@ const (
 
 // HandleSelfAvatarUpload handles self avtar upload requests.
 func HandleSelfAvatarUpload(c echo.Context) error {
+	cc := c.(*authmiddlewares.AuthContext)
+	accountID := cc.Session.Data.AccountID
+
+	hub := sentryecho.GetHubFromContext(c)
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID: accountID,
+		})
+	})
+
 	reqBody := new(avatarUploadRequestBody)
 	err := c.Bind(reqBody)
 	if err != nil {
@@ -61,9 +74,6 @@ func HandleSelfAvatarUpload(c echo.Context) error {
 	if reqBody.ContentType != imageContentType {
 		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentType"))
 	}
-
-	cc := c.(*authmiddlewares.AuthContext)
-	accountID := cc.Session.Data.AccountID
 
 	// Validate the content hash
 	contentSHA256Str := reqBody.ContentSHA256
@@ -87,7 +97,7 @@ func HandleSelfAvatarUpload(c echo.Context) error {
 		Expires:        urlExpireTime.Time(),
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := avatarUploadResponseBody{

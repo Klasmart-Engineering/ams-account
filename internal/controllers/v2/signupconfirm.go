@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
@@ -54,7 +55,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		} else if errStr == "signature is invalid" {
 			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidSignature)
 		}
-		return errVerify
+		return helpers.HandleInternalError(c, errVerify)
 	}
 
 	// Verify that the current password is correct
@@ -68,7 +69,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 
 	errClaim := claims.Valid()
 	if errClaim != nil {
-		return errClaim
+		return helpers.HandleInternalError(c, errClaim)
 	}
 
 	userEmail := claims.Email
@@ -120,7 +121,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		// Check if the email is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailAlreadyUsed)
@@ -130,7 +131,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		// Check if the phone number is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
@@ -140,12 +141,12 @@ func HandleSignUpConfirm(c echo.Context) error {
 
 	accountUUID, err := uuid.NewRandom()
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	geoIPResult, err := globals.GeoIPService.GetCountryFromIP(clientIP)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	countryCode := defs.DefaultCountryCode
@@ -170,7 +171,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		Language:     userLanguage,
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[SIGNUP] A successful sign-up request for account [%s] from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
@@ -186,7 +187,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		}
 		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 

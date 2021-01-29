@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -48,7 +49,7 @@ func HandleVerifyEmail(c echo.Context) error {
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if verificationInfo == nil {
 		logger.LogFormat("[VERIFY] A verify email request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
@@ -66,7 +67,7 @@ func HandleVerifyEmail(c echo.Context) error {
 
 	err = globals.AccountDatabase.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountEmailVerifiedFlag)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[VERIFY] A successful email verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
@@ -87,13 +88,13 @@ func HandleVerifyEmail(c echo.Context) error {
 	}
 	err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Remove the verification code
 	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypeEmail)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := verifyEmailResponseBody{

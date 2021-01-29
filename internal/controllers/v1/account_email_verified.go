@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
@@ -23,7 +24,7 @@ func HandleAccountEmailVerified(c echo.Context) error {
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if verificationInfo == nil {
 		// Instead of returning an error, return false so it avoids accountId guessing
 

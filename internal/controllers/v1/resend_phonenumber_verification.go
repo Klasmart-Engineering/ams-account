@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -42,7 +43,7 @@ func HandleResendPhoneNumberVerification(c echo.Context) error {
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if verificationInfo == nil {
 		logger.LogFormat("[RESENDVERIFY] A resend phone number verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return apirequests.EchoSetClientError(c, apierrors.ErrorVerificationNotFound)
@@ -58,13 +59,13 @@ func HandleResendPhoneNumberVerification(c echo.Context) error {
 	// Generate a new verification code
 	verificationCode, err := securitycodes.GenerateSecurityCode(defs.SignUpVerificationCodeByteLength)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Create the account verification in the database
 	err = globals.AccountDatabase.CreateAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber, verificationCode)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Re-send the verification SMS
@@ -81,7 +82,7 @@ func HandleResendPhoneNumberVerification(c echo.Context) error {
 	}
 	err = globals.MessageSendQueue.EnqueueMessage(smsMessage)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	return c.NoContent(http.StatusOK)

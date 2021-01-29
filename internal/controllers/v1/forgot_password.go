@@ -5,6 +5,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -87,13 +88,13 @@ func HandleForgotPassword(c echo.Context) error {
 		// Get the account ID from the email
 		accountID, foundAccount, err = globals.AccountDatabase.GetAccountIDFromEmail(userEmail)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	} else {
 		// Get the account ID from the phone number
 		accountID, foundAccount, err = globals.AccountDatabase.GetAccountIDFromPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 
@@ -102,7 +103,7 @@ func HandleForgotPassword(c echo.Context) error {
 	if foundAccount {
 		accInfo, err = globals.AccountDatabase.GetAccountSignInInfoByID(accountID)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
 			apirequests.EchoSetClientError(c, apierrors.ErrorEmailNotVerified)
 		}
@@ -119,12 +120,12 @@ func HandleForgotPassword(c echo.Context) error {
 		}
 		verificationCode, err := securitycodes.GenerateSecurityCode(verificationCodeByteCount)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 
 		err = globals.AccountDatabase.CreateAccountVerification(accInfo.ID, accountdatabase.VerificationTypePassword, verificationCode)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 
 		// Override the user language based on the database record
@@ -140,13 +141,13 @@ func HandleForgotPassword(c echo.Context) error {
 		if isUsingEmail {
 			err = sendForgotPasswordEmailFound(userEmail, userLanguage, template)
 			if err != nil {
-				return err
+				return helpers.HandleInternalError(c, err)
 			}
 		} else {
 			userPhoneNumber = accInfo.PhoneNumber
 			err = sendForgotPasswordSMSFound(userPhoneNumber, userLanguage, template)
 			if err != nil {
-				return err
+				return helpers.HandleInternalError(c, err)
 			}
 		}
 	} else {
@@ -154,7 +155,7 @@ func HandleForgotPassword(c echo.Context) error {
 			logger.LogFormat("[FORGETPW] A request to recover from a forgotten password received for non-existing account [%s] from IP [%s] with UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			err = sendForgotPasswordEmailNotFound(userEmail, userLanguage)
 			if err != nil {
-				return err
+				return helpers.HandleInternalError(c, err)
 			}
 		} else {
 			// NOTE: We don't send anything to unknown phone numbers

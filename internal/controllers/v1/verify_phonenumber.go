@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -46,7 +47,7 @@ func HandleVerifyPhoneNumber(c echo.Context) error {
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if verificationInfo == nil {
 		logger.LogFormat("[VERIFY] A verify phone number request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
@@ -64,7 +65,7 @@ func HandleVerifyPhoneNumber(c echo.Context) error {
 
 	err = globals.AccountDatabase.SetAccountFlags(accountID, accounts.IsAccountVerifiedFlag|accounts.IsAccountPhoneNumberVerifiedFlag)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[VERIFY] A successful phone number verify request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
@@ -80,7 +81,7 @@ func HandleVerifyPhoneNumber(c echo.Context) error {
 	// Remove the verification code
 	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePhoneNumber)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := verifyPhoneNumberResponseBody{

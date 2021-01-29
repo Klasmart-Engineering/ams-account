@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
@@ -31,7 +32,7 @@ func HandleVerifyEmail(c echo.Context) error {
 
 	_, ok, err := globals.AccountDatabase.GetAccountIDFromEmail(email)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := verifyEmailRespBody{

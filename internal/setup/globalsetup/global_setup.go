@@ -2,6 +2,8 @@ package globalsetup
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/accountverificationservice"
@@ -19,6 +21,7 @@ import (
 	"bitbucket.org/calmisland/go-server-requests/apirouter"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
+	"github.com/getsentry/sentry-go"
 )
 
 // Setup Setup
@@ -37,6 +40,17 @@ func Setup() {
 	setupCORS()
 
 	globals.Verify()
+}
+
+func setupSentry() {
+	var env string = fmt.Sprintf("%s", os.Getenv("SERVER_STAGE"))
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:         "https://9947c607a7d746d695e356ebca3c632f@o412774.ingest.sentry.io/5413073",
+		Environment: env,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
+	}
 }
 
 func setupAccountDatabase() {

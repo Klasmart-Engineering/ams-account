@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -11,6 +12,9 @@ import (
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
 	"bitbucket.org/calmisland/go-server-utils/textutils"
+	"github.com/getsentry/sentry-go"
+	sentryecho "github.com/getsentry/sentry-go/echo"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,6 +36,16 @@ const (
 
 // HandleEditSelfAccountInfo handles requests for editing account information for the signed in account.
 func HandleEditSelfAccountInfo(c echo.Context) error {
+	cc := c.(*authmiddlewares.AuthContext)
+	accountID := cc.Session.Data.AccountID
+
+	hub := sentryecho.GetHubFromContext(c)
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID: accountID,
+		})
+	})
+
 	// Parse the request body
 	reqBody := new(editSelfAccountInfoRequestBody)
 	err := c.Bind(reqBody)
@@ -73,15 +87,13 @@ func HandleEditSelfAccountInfo(c echo.Context) error {
 		}
 	}
 
-	cc := c.(*authmiddlewares.AuthContext)
-	accountID := cc.Session.Data.AccountID
 	err = globals.AccountDatabase.EditAccount(accountID, &accountdatabase.AccountEditInfo{
 		Language: language,
 		Names:    editNameInfo,
 	})
 
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[EDITACCOUNTINFO] A successful edit account request for account [%s]\n", accountID)

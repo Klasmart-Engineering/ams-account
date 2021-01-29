@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/account_jwt_service"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -89,7 +90,7 @@ func HandleSignupRequest(c echo.Context) error {
 		// Check if the email is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithEmail(userEmail)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailAlreadyUsed)
@@ -98,7 +99,7 @@ func HandleSignupRequest(c echo.Context) error {
 		// Check if the phone number is already used by another account
 		accountExists, err := globals.AccountDatabase.AccountExistsWithPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
 			return apirequests.EchoSetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
@@ -107,12 +108,12 @@ func HandleSignupRequest(c echo.Context) error {
 
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(userPassword, false)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	verificationCode, err := securitycodes.GenerateSecurityCode(defs.SignUpVerificationCodeByteLength)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Sets the default language if none is set
@@ -155,14 +156,14 @@ func HandleSignupRequest(c echo.Context) error {
 
 	err = globals.MessageSendQueue.EnqueueMessage(message)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[VERIFICATION] A successful verification request from IP [%s] UserAgent [%s]\n", clientIP, clientUserAgent)
 	logger.LogFormat("[VERIFICATION] Created Verification Code: %s\n", verificationCode)
 
 	if errToken != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	response := verifyCodeResponseBody{

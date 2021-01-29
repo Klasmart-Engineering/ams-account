@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
@@ -14,6 +15,8 @@ import (
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
+	"github.com/getsentry/sentry-go"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,6 +27,16 @@ type editSelfAccountPasswordRequestBody struct {
 
 // HandleEditSelfAccountPassword handles requests of editing the password of the signed in account.
 func HandleEditSelfAccountPassword(c echo.Context) error {
+	cc := c.(*authmiddlewares.AuthContext)
+	accountID := cc.Session.Data.AccountID
+
+	hub := sentryecho.GetHubFromContext(c)
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID: accountID,
+		})
+	})
+
 	// Parse the request body
 	reqBody := new(editSelfAccountPasswordRequestBody)
 	err := c.Bind(reqBody)
@@ -32,8 +45,6 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
-	cc := c.(*authmiddlewares.AuthContext)
-	accountID := cc.Session.Data.AccountID
 	req := c.Request()
 	clientIP := net.ParseIP(c.RealIP())
 	clientUserAgent := req.UserAgent()
@@ -53,7 +64,7 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	// Get the account information
 	accInfo, err := globals.AccountDatabase.GetAccountSignInInfoByID(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if accInfo == nil {
 		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidLogin)
 	}
@@ -68,7 +79,7 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	extraSecure := (accInfo.AdminRole > 0)
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(newPassword, extraSecure)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Change the password in the database
@@ -76,7 +87,7 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 		PasswordHash: &hashedPassword,
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	logger.LogFormat("[EDITACCOUNTPW] A successful edit account password request for account [%s]\n", accountID)
@@ -85,7 +96,7 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	if accounts.AccountMustSetPassword(accInfo.Flags) {
 		err = globals.AccountDatabase.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 
@@ -109,7 +120,7 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 		}
 		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 

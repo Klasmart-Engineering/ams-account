@@ -6,6 +6,7 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
@@ -55,7 +56,7 @@ func HandleRestorePassword(c echo.Context) error {
 			accountEmail := reqBody.AccountEmail
 			accountIDResult, foundAccount, err := globals.AccountDatabase.GetAccountIDFromEmail(accountEmail)
 			if err != nil {
-				return err
+				return helpers.HandleInternalError(c, err)
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
 				return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
@@ -74,7 +75,7 @@ func HandleRestorePassword(c echo.Context) error {
 			// Get the account ID from the email
 			accountIDResult, foundAccount, err := globals.AccountDatabase.GetAccountIDFromPhoneNumber(accountPhoneNumber)
 			if err != nil {
-				return err
+				return helpers.HandleInternalError(c, err)
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
 				return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
@@ -88,7 +89,7 @@ func HandleRestorePassword(c echo.Context) error {
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if verificationInfo == nil || verificationInfo.VerificationCodes.Password == nil {
 		logger.LogFormat("[RESTOREPW] A restore password request for account [%s] without a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
 		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
@@ -109,7 +110,7 @@ func HandleRestorePassword(c echo.Context) error {
 	extraSecure := (verificationInfo.AdminRole > 0)
 	hashedPassword, err := globals.PasswordHasher.GeneratePasswordHash(password, extraSecure)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Change the password
@@ -117,20 +118,20 @@ func HandleRestorePassword(c echo.Context) error {
 		PasswordHash: &hashedPassword,
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Remove the verification code
 	err = globals.AccountDatabase.RemoveAccountVerification(accountID, accountdatabase.VerificationTypePassword)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	}
 
 	// Resets the flag that this account must set a new password
 	if accounts.AccountMustSetPassword(verificationInfo.Flags) {
 		err = globals.AccountDatabase.RemoveAccountFlags(accountID, accounts.MustSetPasswordFlag)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 
@@ -154,7 +155,7 @@ func HandleRestorePassword(c echo.Context) error {
 		}
 		err = globals.MessageSendQueue.EnqueueMessage(emailMessage)
 		if err != nil {
-			return err
+			return helpers.HandleInternalError(c, err)
 		}
 	}
 

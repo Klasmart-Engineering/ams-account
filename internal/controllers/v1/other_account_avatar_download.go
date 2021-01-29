@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
@@ -38,7 +39,7 @@ func HandleOtherAccountAvatarDownload(c echo.Context) error {
 	// Then get the account information
 	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if accInfo == nil {
 		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}
@@ -54,7 +55,7 @@ func HandleOtherAccountAvatarDownload(c echo.Context) error {
 		},
 	})
 	if err != nil {
-		return err
+		return helpers.HandleInternalError(c, err)
 	} else if downloadURLResult == nil {
 		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}

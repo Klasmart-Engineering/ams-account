@@ -1,12 +1,11 @@
 package routers
 
 import (
-	"net/http"
-
 	apiControllerV1 "bitbucket.org/calmisland/account-lambda-funcs/internal/controllers/v1"
 	apiControllerV2 "bitbucket.org/calmisland/account-lambda-funcs/internal/controllers/v2"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -19,8 +18,7 @@ func SetupRouter() *echo.Echo {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
-	e.GET("/", hello)
+	e.Use(sentryecho.New(sentryecho.Options{}))
 
 	v1 := e.Group("/v1")
 
@@ -65,9 +63,4 @@ func SetupRouter() *echo.Echo {
 	v2.POST("/kl15/migrate", apiControllerV2.HandleKl15Migration)
 
 	return e
-}
-
-// Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
 }
