@@ -3,11 +3,12 @@ package v1
 import (
 	"net/http"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
+	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
 	"bitbucket.org/calmisland/go-server-utils/textutils"
 	"github.com/labstack/echo/v4"
@@ -36,14 +37,14 @@ func HandleEditSelfAccountInfo(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	language := reqBody.Language
 	if language != nil {
 		languageValue := textutils.SanitizeString(*language)
 		if !langutils.IsValidLanguageCode(languageValue) {
-			return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("lang"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("lang"))
 		}
 
 		language = &languageValue
@@ -56,13 +57,13 @@ func HandleEditSelfAccountInfo(c echo.Context) error {
 		firstName := textutils.SanitizeString(names.FirstName)
 		lastName := textutils.SanitizeString(names.LastName)
 		if len(fullName) == 0 && len(firstName) == 0 && len(lastName) == 0 { // At least one name must be specified
-			return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 		} else if len(fullName) > maxFullNameLength {
-			return echoadapter.SetClientError(c, apierrors.ErrorInputTooLong.WithField("names.fullName").WithValue(maxFullNameLength))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputTooLong.WithField("names.fullName").WithValue(maxFullNameLength))
 		} else if len(firstName) > maxPartNameLength {
-			return echoadapter.SetClientError(c, apierrors.ErrorInputTooLong.WithField("names.firstName").WithValue(maxPartNameLength))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputTooLong.WithField("names.firstName").WithValue(maxPartNameLength))
 		} else if len(lastName) > maxPartNameLength {
-			return echoadapter.SetClientError(c, apierrors.ErrorInputTooLong.WithField("names.lastName").WithValue(maxPartNameLength))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputTooLong.WithField("names.lastName").WithValue(maxPartNameLength))
 		}
 
 		editNameInfo = &accountdatabase.AccountNameInfo{
@@ -72,7 +73,7 @@ func HandleEditSelfAccountInfo(c echo.Context) error {
 		}
 	}
 
-	cc := c.(*echoadapter.AuthContext)
+	cc := c.(*authmiddlewares.AuthContext)
 	accountID := cc.Session.Data.AccountID
 	err = globals.AccountDatabase.EditAccount(accountID, &accountdatabase.AccountEditInfo{
 		Language: language,

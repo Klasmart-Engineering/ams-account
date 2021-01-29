@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
@@ -13,6 +12,7 @@ import (
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"github.com/labstack/echo/v4"
 )
@@ -28,11 +28,11 @@ func HandleResendPhoneNumberVerification(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	if len(reqBody.AccountID) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	accountID := reqBody.AccountID
@@ -45,12 +45,12 @@ func HandleResendPhoneNumberVerification(c echo.Context) error {
 		return err
 	} else if verificationInfo == nil {
 		logger.LogFormat("[RESENDVERIFY] A resend phone number verification request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-		return echoadapter.SetClientError(c, apierrors.ErrorVerificationNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorVerificationNotFound)
 	}
 
 	if accounts.IsAccountPhoneNumberVerified(verificationInfo.Flags) {
 		logger.LogFormat("[RESENDVERIFY] A resend phone number verification request for account [%s] that was already verified from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-		return echoadapter.SetClientError(c, apierrors.ErrorAlreadyVerified)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorAlreadyVerified)
 	}
 
 	logger.LogFormat("[RESENDVERIFY] A successful resend phone number verification request for account [%s] from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)

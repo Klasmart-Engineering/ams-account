@@ -3,10 +3,10 @@ package v1
 import (
 	"net/http"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +18,7 @@ type accountPhoneVerifiedResponseBody struct {
 func HandleAccountPhoneVerified(c echo.Context) error {
 	accountID := c.QueryParam("accountId")
 	if len(accountID) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)

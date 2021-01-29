@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/timeutils"
 	"github.com/labstack/echo/v4"
 )
@@ -43,32 +44,32 @@ func HandleSelfAvatarUpload(c echo.Context) error {
 	reqBody := new(avatarUploadRequestBody)
 	err := c.Bind(reqBody)
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	if len(reqBody.ContentType) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentType"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentType"))
 	} else if len(reqBody.ContentSHA256) != sha256HexLength {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentSha256"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentSha256"))
 	} else if reqBody.ContentLength <= 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentLength"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentLength"))
 	} else if reqBody.ContentLength > avatarMaxSize {
-		return echoadapter.SetClientError(c, apierrors.ErrorInputTooLong.WithField("contentLength").WithValue(avatarMaxSize))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInputTooLong.WithField("contentLength").WithValue(avatarMaxSize))
 	}
 
 	// Validate the content type
 	if reqBody.ContentType != imageContentType {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentType"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentType"))
 	}
 
-	cc := c.(*echoadapter.AuthContext)
+	cc := c.(*authmiddlewares.AuthContext)
 	accountID := cc.Session.Data.AccountID
 
 	// Validate the content hash
 	contentSHA256Str := reqBody.ContentSHA256
 	contentSHA256, err := hex.DecodeString(contentSHA256Str)
 	if err != nil || len(contentSHA256) != sha256ByteLength {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentSha256"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("contentSha256"))
 	}
 
 	// Get the avatar expiration time

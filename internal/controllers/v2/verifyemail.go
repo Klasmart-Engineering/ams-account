@@ -3,9 +3,9 @@ package v2
 import (
 	"net/http"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,7 +24,7 @@ func HandleVerifyEmail(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	email := reqBody.Email

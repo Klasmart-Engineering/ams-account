@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,7 +20,7 @@ type otherAccountInfoResponseBody struct {
 func HandleGetOtherAccountInfo(c echo.Context) error {
 	accountID := c.Param("accountId")
 	if len(accountID) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	// Then get the account information
@@ -28,7 +28,7 @@ func HandleGetOtherAccountInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	} else if accInfo == nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorItemNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}
 
 	response := otherAccountInfoResponseBody{

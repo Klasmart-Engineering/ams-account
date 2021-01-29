@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
@@ -13,6 +12,7 @@ import (
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"bitbucket.org/calmisland/go-server-utils/phoneutils"
 	"github.com/labstack/echo/v4"
@@ -33,13 +33,13 @@ func HandleRestorePassword(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	if len(reqBody.AccountID) == 0 && len(reqBody.AccountEmail) == 0 && len(reqBody.AccountPhoneNumber) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	} else if len(reqBody.VerificationCode) == 0 || len(reqBody.Password) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	accountID := reqBody.AccountID
@@ -58,17 +58,17 @@ func HandleRestorePassword(c echo.Context) error {
 				return err
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountEmail, clientIP, clientUserAgent)
-				return echoadapter.SetClientError(c, apierrors.ErrorInvalidVerificationCode)
+				return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
 			}
 
 			accountID = accountIDResult
 		} else if len(reqBody.AccountPhoneNumber) > 0 {
 			accountPhoneNumber, err := phoneutils.CleanPhoneNumber(reqBody.AccountPhoneNumber)
 			if err != nil {
-				return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
+				return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
 			} else if !phoneutils.IsValidPhoneNumber(accountPhoneNumber) {
 				logger.LogFormat("[RESTOREPW] A restore password request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
-				return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
+				return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("accountPhoneNr"))
 			}
 
 			// Get the account ID from the email
@@ -77,12 +77,12 @@ func HandleRestorePassword(c echo.Context) error {
 				return err
 			} else if !foundAccount {
 				logger.LogFormat("[RESTOREPW] A restore password request for non-existing account [%s] from IP [%s] UserAgent [%s]\n", accountPhoneNumber, clientIP, clientUserAgent)
-				return echoadapter.SetClientError(c, apierrors.ErrorInvalidVerificationCode)
+				return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
 			}
 
 			accountID = accountIDResult
 		} else {
-			return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("accountEmail"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("accountEmail"))
 		}
 	}
 
@@ -91,16 +91,16 @@ func HandleRestorePassword(c echo.Context) error {
 		return err
 	} else if verificationInfo == nil || verificationInfo.VerificationCodes.Password == nil {
 		logger.LogFormat("[RESTOREPW] A restore password request for account [%s] without a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-		return echoadapter.SetClientError(c, apierrors.ErrorItemNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	} else if !securitycodes.ValidateSecurityCode(*verificationInfo.VerificationCodes.Password, verificationCode) {
 		logger.LogFormat("[RESTOREPW] A restore password request for account [%s] with incorrect password verification code from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidVerificationCode)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
 	}
 
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(password)
 	if err != nil {
-		return echoadapter.HandlePasswordValidatorError(c, err)
+		return defs.HandlePasswordValidatorError(c, err)
 	}
 
 	logger.LogFormat("[RESTOREPW] A successful restore password request for account [%s] using a forgot password request from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)

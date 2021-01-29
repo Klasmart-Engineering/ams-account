@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/account_jwt_service"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
@@ -14,6 +13,7 @@ import (
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
 	"bitbucket.org/calmisland/go-server-utils/phoneutils"
@@ -39,7 +39,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	verificationToken := reqBody.VerificationToken
@@ -50,9 +50,9 @@ func HandleSignUpConfirm(c echo.Context) error {
 	if errVerify != nil {
 		errStr := errVerify.Error()
 		if errStr == "Token is expired." { // jwt module returns this text
-			return echoadapter.SetClientError(c, apierrors.ErrorExpiredVerificationToken)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorExpiredVerificationToken)
 		} else if errStr == "signature is invalid" {
-			return echoadapter.SetClientError(c, apierrors.ErrorInvalidSignature)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidSignature)
 		}
 		return errVerify
 	}
@@ -63,7 +63,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 		logger.LogFormat("[SIGNUP CONFIRM] USE_TEST_VERIFICATION_CODE and verification code matches %s\n", defs.TEST_VERIFICATION_CODE)
 	} else if !globals.PasswordHasher.VerifyPasswordHash(verificationCode, claims.VerificationCode) { // Verifies the password
 		logger.LogFormat("[SIGNUP CONFIRM] Verification Code [%s] does not match\n", verificationCode)
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidVerificationCode)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidVerificationCode)
 	}
 
 	errClaim := claims.Valid()
@@ -84,10 +84,10 @@ func HandleSignUpConfirm(c echo.Context) error {
 		// Validate parameters
 		if !emailutils.IsValidEmailAddressFormat(userEmail) {
 			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
 		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
 			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
 		}
 
 		// There should not be an email and a phone number at the same time
@@ -96,23 +96,23 @@ func HandleSignUpConfirm(c echo.Context) error {
 	} else if len(userPhoneNumber) > 0 {
 		userPhoneNumber, err = phoneutils.CleanPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		} else if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
 			logger.LogFormat("[SIGNUP] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
 		// There should not be an email and a phone number at the same time
 		userEmail = ""
 		isUsingEmail = false
 	} else {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(userPassword)
 	if err != nil {
-		return echoadapter.HandlePasswordValidatorError(c, err)
+		return defs.HandlePasswordValidatorError(c, err)
 	}
 
 	var flags int32 = 0
@@ -123,7 +123,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 			return err
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorEmailAlreadyUsed)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailAlreadyUsed)
 		}
 		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountEmailVerifiedFlag)
 	} else {
@@ -133,7 +133,7 @@ func HandleSignUpConfirm(c echo.Context) error {
 			return err
 		} else if accountExists {
 			logger.LogFormat("[SIGNUP] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
 		}
 		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountPhoneNumberVerifiedFlag)
 	}

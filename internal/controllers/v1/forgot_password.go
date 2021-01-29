@@ -4,7 +4,6 @@ import (
 	"net"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
@@ -12,6 +11,7 @@ import (
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/securitycodes"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
@@ -38,7 +38,7 @@ func HandleForgotPassword(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	userEmail := reqBody.Email
@@ -52,9 +52,9 @@ func HandleForgotPassword(c echo.Context) error {
 	if len(userEmail) > 0 {
 		// Validate parameters
 		if !emailutils.IsValidEmailAddressFormat(userEmail) {
-			echoadapter.SetClientError(c, apierrors.ErrorInvalidEmailFormat)
+			apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailFormat)
 		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
-			echoadapter.SetClientError(c, apierrors.ErrorInvalidEmailHost)
+			apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailHost)
 		}
 
 		// There should not be an email and a phone number at the same time
@@ -63,17 +63,17 @@ func HandleForgotPassword(c echo.Context) error {
 	} else if len(userPhoneNumber) > 0 {
 		userPhoneNumber, err = phoneutils.CleanPhoneNumber(userPhoneNumber)
 		if err != nil {
-			echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		} else if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
 			logger.LogFormat("[FORGETPW] A request to recover from a forgotten password for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
 		// There should not be an email and a phone number at the same time
 		userEmail = ""
 		isUsingEmail = false
 	} else {
-		echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
+		apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	// Sets the default language if none is set
@@ -104,10 +104,10 @@ func HandleForgotPassword(c echo.Context) error {
 		if err != nil {
 			return err
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
-			echoadapter.SetClientError(c, apierrors.ErrorEmailNotVerified)
+			apirequests.EchoSetClientError(c, apierrors.ErrorEmailNotVerified)
 		}
 	} else {
-		echoadapter.SetClientError(c, apierrors.ErrorAccountNotFound)
+		apirequests.EchoSetClientError(c, apierrors.ErrorAccountNotFound)
 	}
 
 	if accInfo != nil {

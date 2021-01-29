@@ -5,8 +5,8 @@ import (
 
 	apiControllerV1 "bitbucket.org/calmisland/account-lambda-funcs/internal/controllers/v1"
 	apiControllerV2 "bitbucket.org/calmisland/account-lambda-funcs/internal/controllers/v2"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -40,7 +40,7 @@ func SetupRouter() *echo.Echo {
 	v1verify.GET("/phonenumber", apiControllerV1.HandleAccountPhoneVerified)
 	v1verify.POST("/phonenumber", apiControllerV1.HandleVerifyPhoneNumber)
 
-	authMiddleware := echoadapter.AuthMiddleware(globals.AccessTokenValidator, true)
+	authMiddleware := authmiddlewares.EchoAuthMiddleware(globals.AccessTokenValidator, true)
 
 	v1self := v1.Group("/self")
 	v1self.Use(authMiddleware)

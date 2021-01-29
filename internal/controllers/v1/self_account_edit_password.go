@@ -5,14 +5,15 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
+	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -28,10 +29,10 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
-	cc := c.(*echoadapter.AuthContext)
+	cc := c.(*authmiddlewares.AuthContext)
 	accountID := cc.Session.Data.AccountID
 	req := c.Request()
 	clientIP := net.ParseIP(c.RealIP())
@@ -40,13 +41,13 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	currentPassword := reqBody.CurrentPassword
 	newPassword := reqBody.NewPassword
 	if len(currentPassword) == 0 || len(newPassword) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	// Validate the password
 	err = globals.PasswordPolicyValidator.ValidatePassword(newPassword)
 	if err != nil {
-		return echoadapter.HandlePasswordValidatorError(c, err)
+		return defs.HandlePasswordValidatorError(c, err)
 	}
 
 	// Get the account information
@@ -54,13 +55,13 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 	if err != nil {
 		return err
 	} else if accInfo == nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidLogin)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidLogin)
 	}
 
 	// Verify that the current password is correct
 	if !globals.PasswordHasher.VerifyPasswordHash(currentPassword, accInfo.PasswordHash) { // Verifies the password
 		logger.LogFormat("[EDITACCOUNTPW] An edit password request for account [%s] with the incorrect current password from IP [%s] UserAgent [%s]\n", accountID, clientIP, clientUserAgent)
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidPassword)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidPassword)
 	}
 
 	// Generate the password hash

@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/defs"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/accounts"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 	"bitbucket.org/calmisland/go-server-utils/emailutils"
 	"bitbucket.org/calmisland/go-server-utils/langutils"
@@ -37,7 +37,7 @@ func HandleKl15Migration(c echo.Context) error {
 	err := c.Bind(reqBody)
 
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorBadRequestBody)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorBadRequestBody)
 	}
 
 	userEmail := reqBody.Email
@@ -53,10 +53,10 @@ func HandleKl15Migration(c echo.Context) error {
 		// Validate parameters
 		if !emailutils.IsValidEmailAddressFormat(userEmail) {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for account [%s] with invalid email address from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
 		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for account [%s] with invalid email host from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("email"))
 		}
 
 		// There should not be an email and a phone number at the same time
@@ -65,22 +65,22 @@ func HandleKl15Migration(c echo.Context) error {
 	} else if len(userPhoneNumber) > 0 {
 		userPhoneNumber, err = phoneutils.CleanPhoneNumber(userPhoneNumber)
 		if err != nil {
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		} else if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
 		// There should not be an email and a phone number at the same time
 		userEmail = ""
 		isUsingEmail = false
 	} else {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	kl15AccInfo, found, err := globals.AccountDatabase.GetAccountsMigrationKl1dot5InfoFromEmail(userEmail)
 	if !found || err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorAccountNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorAccountNotFound)
 	}
 
 	// Check Migration status.
@@ -108,7 +108,7 @@ func HandleKl15Migration(c echo.Context) error {
 	}
 
 	if !isPassed {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidPassword)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidPassword)
 	}
 
 	// generate AMS hashed password
@@ -127,7 +127,7 @@ func HandleKl15Migration(c echo.Context) error {
 			return err
 		} else if accountExists {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for already existing account [%s] email from IP [%s] UserAgent [%s]\n", userEmail, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorEmailAlreadyUsed)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailAlreadyUsed)
 		}
 		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountEmailVerifiedFlag)
 	} else {
@@ -137,7 +137,7 @@ func HandleKl15Migration(c echo.Context) error {
 			return err
 		} else if accountExists {
 			logger.LogFormat("[KL1.5-MIGRATION] A sign-up request for already existing account [%s] phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			return echoadapter.SetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorPhoneNumberAlreadyUsed)
 		}
 		flags = int32(accounts.IsAccountVerifiedFlag | accounts.IsAccountPhoneNumberVerifiedFlag)
 	}

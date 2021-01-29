@@ -1,6 +1,7 @@
 package globals
 
 import (
+	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-account/accountdatabase"
 	"bitbucket.org/calmisland/go-server-account/avatars"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"

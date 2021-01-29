@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/go-server-cloud/cloudstorage"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"bitbucket.org/calmisland/go-server-utils/timeutils"
 	"github.com/labstack/echo/v4"
 )
@@ -20,17 +20,17 @@ const (
 func HandleOtherAccountAvatarDownload(c echo.Context) error {
 	accountID := c.Param("accountId")
 	if len(accountID) == 0 {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters)
 	}
 
 	// Gets the If-Modified-Since header value, if there is one
-	ifNoETagMatch, _ := echoadapter.GetHeaderIfNoneMatch(c)
+	ifNoETagMatch, _ := apirequests.EchoGetHeaderIfNoneMatch(c)
 
 	// Gets the If-Modified-Since header value, if there is one
 	var ifModifiedSinceTime *time.Time
-	ifModifiedSinceTimeValue, hasIfModifiedSince, err := echoadapter.GetHeaderIfModifiedSince(c)
+	ifModifiedSinceTimeValue, hasIfModifiedSince, err := apirequests.EchoGetHeaderIfModifiedSince(c)
 	if err != nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorInvalidParameters.WithField("If-Modified-Since"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("If-Modified-Since"))
 	} else if hasIfModifiedSince {
 		ifModifiedSinceTime = &ifModifiedSinceTimeValue
 	}
@@ -40,7 +40,7 @@ func HandleOtherAccountAvatarDownload(c echo.Context) error {
 	if err != nil {
 		return err
 	} else if accInfo == nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorItemNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}
 
 	// Get the download URL expiration time
@@ -56,7 +56,7 @@ func HandleOtherAccountAvatarDownload(c echo.Context) error {
 	if err != nil {
 		return err
 	} else if downloadURLResult == nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorItemNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}
 
 	// Skip the redirection if the client can use the cached version

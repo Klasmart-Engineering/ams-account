@@ -3,9 +3,10 @@ package v1
 import (
 	"net/http"
 
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/echoadapter"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
+	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
+	"bitbucket.org/calmisland/go-server-requests/apirequests"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,14 +22,14 @@ type selfAccountInfoResponseBody struct {
 // HandleGetSelfAccountInfo handles retrieving the signed in account information requests.
 func HandleGetSelfAccountInfo(c echo.Context) error {
 	// Then get the account information
-	cc := c.(*echoadapter.AuthContext)
+	cc := c.(*authmiddlewares.AuthContext)
 
 	accountID := cc.Session.Data.AccountID
 	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
 		return err
 	} else if accInfo == nil {
-		return echoadapter.SetClientError(c, apierrors.ErrorItemNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorItemNotFound)
 	}
 
 	response := selfAccountInfoResponseBody{
