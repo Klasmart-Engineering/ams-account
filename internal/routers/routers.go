@@ -16,7 +16,7 @@ func SetupRouter() *echo.Echo {
 	e := echo.New()
 
 	// Middleware
-	e.Use(middleware.Logger())
+	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(sentryecho.New(sentryecho.Options{}))
 
