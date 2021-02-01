@@ -18,6 +18,7 @@ func SetupRouter() *echo.Echo {
 	// Middleware
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 	e.Use(sentryecho.New(sentryecho.Options{}))
 
 	v1 := e.Group("/v1")
