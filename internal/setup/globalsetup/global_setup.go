@@ -26,7 +26,7 @@ import (
 
 // Setup Setup
 func Setup() {
-	// Setup the Slack reporter first
+	setupSentry()
 	setupSlackReporter()
 
 	setupAccountDatabase()
