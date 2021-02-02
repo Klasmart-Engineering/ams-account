@@ -5,11 +5,8 @@ import (
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
-	"bitbucket.org/calmisland/go-server-auth/authmiddlewares"
 	"bitbucket.org/calmisland/go-server-requests/apierrors"
 	"bitbucket.org/calmisland/go-server-requests/apirequests"
-	"github.com/getsentry/sentry-go"
-	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,15 +22,7 @@ type selfAccountInfoResponseBody struct {
 // HandleGetSelfAccountInfo handles retrieving the signed in account information requests.
 func HandleGetSelfAccountInfo(c echo.Context) error {
 	// Then get the account information
-	cc := c.(*authmiddlewares.AuthContext)
-	accountID := cc.Session.Data.AccountID
-
-	hub := sentryecho.GetHubFromContext(c)
-	hub.ConfigureScope(func(scope *sentry.Scope) {
-		scope.SetUser(sentry.User{
-			ID: accountID,
-		})
-	})
+	accountID := helpers.GetAccountID(c)
 
 	accInfo, err := globals.AccountDatabase.GetAccountInfo(accountID)
 	if err != nil {
