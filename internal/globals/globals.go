@@ -6,16 +6,12 @@ import (
 	"bitbucket.org/calmisland/go-server-account/avatars"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-messages/sendmessagequeue"
-	"bitbucket.org/calmisland/go-server-requests/apirouter"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 	"github.com/calmisland/go-errors"
 )
 
 var (
-	// CORSOptions are the CORS options to use for the API.
-	CORSOptions *apirouter.CORSOptions
-
 	// AccessTokenValidator is the access token validator.
 	AccessTokenValidator accesstokens.Validator
 

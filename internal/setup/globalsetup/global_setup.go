@@ -18,7 +18,6 @@ import (
 	"bitbucket.org/calmisland/go-server-logs/errorreporter"
 	"bitbucket.org/calmisland/go-server-logs/errorreporter/slackreporter"
 	"bitbucket.org/calmisland/go-server-messages/sendmessagequeue"
-	"bitbucket.org/calmisland/go-server-requests/apirouter"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
 	"github.com/getsentry/sentry-go"
@@ -37,7 +36,6 @@ func Setup() {
 	setupGeoIP()
 	setupAvatarStorage()
 	setupAccountVerificationService()
-	setupCORS()
 
 	globals.Verify()
 }
@@ -180,15 +178,6 @@ func setupAccountVerificationService() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func setupCORS() {
-	var corsConfig apirouter.CORSOptions
-	err := configs.LoadConfig("cross_origin_resource_sharing", &corsConfig, true)
-	if err != nil {
-		panic(err)
-	}
-	globals.CORSOptions = &corsConfig
 }
 
 func setupSlackReporter() {
