@@ -85,5 +85,5 @@ func HandleEditSelfAccountInfo(c echo.Context) error {
 	}
 
 	logger.LogFormat("[EDITACCOUNTINFO] A successful edit account request for account [%s]\n", accountID)
-	return cc.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusOK)
 }

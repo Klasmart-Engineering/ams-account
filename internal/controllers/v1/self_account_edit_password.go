@@ -112,5 +112,5 @@ func HandleEditSelfAccountPassword(c echo.Context) error {
 		}
 	}
 
-	return cc.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusOK)
 }

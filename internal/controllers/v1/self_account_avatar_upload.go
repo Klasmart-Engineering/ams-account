@@ -95,5 +95,5 @@ func HandleSelfAvatarUpload(c echo.Context) error {
 		UploadHeaders: uploadURLResult.Headers,
 	}
 
-	return cc.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }

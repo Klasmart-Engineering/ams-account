@@ -40,5 +40,5 @@ func HandleGetSelfAccountInfo(c echo.Context) error {
 		Language:  accInfo.Language,
 	}
 
-	return cc.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }
