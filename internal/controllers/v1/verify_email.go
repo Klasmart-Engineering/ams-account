@@ -45,7 +45,7 @@ func HandleVerifyEmail(c echo.Context) error {
 	verificationCode := reqBody.VerificationCode
 	req := c.Request()
 	clientIP := net.ParseIP(c.RealIP())
-	clientUserAgent := req.UserAgent
+	clientUserAgent := req.UserAgent()
 
 	verificationInfo, err := globals.AccountDatabase.GetAccountVerifications(accountID)
 	if err != nil {
