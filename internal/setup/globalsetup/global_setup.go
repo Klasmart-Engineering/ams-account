@@ -1,9 +1,9 @@
 package globalsetup
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"os"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/accountverificationservice"
@@ -41,11 +41,7 @@ func Setup() {
 }
 
 func setupSentry() {
-	var env string = fmt.Sprintf("%s", os.Getenv("SERVER_STAGE"))
-
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn:         "https://9947c607a7d746d695e356ebca3c632f@o412774.ingest.sentry.io/5614056",
-		Environment: env,
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
@@ -76,12 +72,22 @@ func setupAccessTokenSystems() {
 		panic(err)
 	}
 
-	bPublicKey := configs.LoadBinary("account.pub")
-	if bPublicKey == nil {
-		panic(errors.New("the account.pub file is mandatory"))
-	}
+	if len(validatorConfig.PublicKey) == 0 {
+		bPublicKey := configs.LoadBinary("account.pub")
+		if bPublicKey == nil {
+			panic(errors.New("the account.pub file is mandatory"))
+		}
+	
+		validatorConfig.PublicKey = string(bPublicKey)	
+	}else{
+		decodedData, err := base64.StdEncoding.DecodeString(validatorConfig.PublicKey)
 
-	validatorConfig.PublicKey = string(bPublicKey)
+		if err != nil {
+			panic(errors.New("connot decode ACCESS_TOKEN_PUBLIC_KEY env with base64 "))
+		}
+
+		validatorConfig.PublicKey = string(decodedData);
+	}
 
 	globals.AccessTokenValidator, err = accesstokens.NewValidator(validatorConfig)
 	if err != nil {
@@ -91,7 +97,7 @@ func setupAccessTokenSystems() {
 
 func setupPasswordPolicyValidator() {
 	var passwordPolicyConfig passwords.PasswordPolicyConfig
-	err := configs.LoadConfig("password_policy", &passwordPolicyConfig, true)
+	err := configs.ReadEnvConfig(&passwordPolicyConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -135,8 +141,25 @@ func setupMessageQueue() {
 	}
 }
 
+func ActivateGeoIPService() error {
+	var config maxmind.GeoIPConfig
+	err := configs.ReadEnvConfig(&config)
+	if err != nil {
+		return err
+	}
+
+	service, err := maxmind.NewGeoIPService(config)
+	if err != nil {
+		return err
+	}
+
+	geoip.SetDefaultService(service)
+	return nil
+}
+
+
 func setupGeoIP() {
-	if err := maxmind.ActivateGeoIPService(); err != nil {
+	if err := ActivateGeoIPService(); err != nil {
 		panic(err)
 	}
 
