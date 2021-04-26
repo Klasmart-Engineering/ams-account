@@ -23,9 +23,9 @@
     "url": "git+ssh://git@bitbucket.org/calmisland/account-lambda-funcs.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "donghun.choi@calmid.com",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/calmisland/account-lambda-funcs#readme",
+  "homepage": "https://calmisland.atlassian.net/wiki/spaces/RP/pages/1095303188/Accounts",
   "devDependencies": {
     "nodemon": "^1.18.11"
   },
@@ -38,8 +38,7 @@
       "docs/*"
     ],
     "watch": [
-      "src/*",
-      "configs/*"
+      "src/*"
     ],
     "verbose": true
   }

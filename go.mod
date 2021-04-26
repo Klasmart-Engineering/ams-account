@@ -17,7 +17,6 @@ require (
 	bitbucket.org/calmisland/go-server-requests v1.21.0
 	bitbucket.org/calmisland/go-server-security v1.1.2
 	bitbucket.org/calmisland/go-server-utils v1.9.2
-	bitbucket.org/calmisland/go-slack v0.2.2 // indirect
 	github.com/aws/aws-sdk-go v1.36.29 // indirect
 	github.com/calmisland/go-errors v0.9.2
 	github.com/calmisland/go-testify v1.3.3

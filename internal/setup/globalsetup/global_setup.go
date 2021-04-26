@@ -15,8 +15,6 @@ import (
 	"bitbucket.org/calmisland/go-server-configs/configs"
 	"bitbucket.org/calmisland/go-server-geoip/geoip"
 	"bitbucket.org/calmisland/go-server-geoip/services/maxmind"
-	"bitbucket.org/calmisland/go-server-logs/errorreporter"
-	"bitbucket.org/calmisland/go-server-logs/errorreporter/slackreporter"
 	"bitbucket.org/calmisland/go-server-messages/sendmessagequeue"
 	"bitbucket.org/calmisland/go-server-requests/tokens/accesstokens"
 	"bitbucket.org/calmisland/go-server-security/passwords"
@@ -26,7 +24,6 @@ import (
 // Setup Setup
 func Setup() {
 	setupSentry()
-	setupSlackReporter()
 
 	setupAccountDatabase()
 	setupAccessTokenSystems()
@@ -201,24 +198,4 @@ func setupAccountVerificationService() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func setupSlackReporter() {
-	var slackReporterConfig slackreporter.Config
-	err := configs.ReadEnvConfig(&slackReporterConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	// Check if there is a configuration for the Slack error reporter
-	if len(slackReporterConfig.HookURL) == 0 {
-		return
-	}
-
-	reporter, err := slackreporter.New(&slackReporterConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	errorreporter.Active = reporter
 }
