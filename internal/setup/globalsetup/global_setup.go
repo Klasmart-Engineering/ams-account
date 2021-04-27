@@ -1,8 +1,6 @@
 package globalsetup
 
 import (
-	"encoding/base64"
-	"errors"
 	"fmt"
 
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
@@ -38,8 +36,7 @@ func Setup() {
 }
 
 func setupSentry() {
-	if err := sentry.Init(sentry.ClientOptions{
-	}); err != nil {
+	if err := sentry.Init(sentry.ClientOptions{}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
 }
@@ -67,23 +64,6 @@ func setupAccessTokenSystems() {
 	err := configs.ReadEnvConfig(&validatorConfig)
 	if err != nil {
 		panic(err)
-	}
-
-	if len(validatorConfig.PublicKey) == 0 {
-		bPublicKey := configs.LoadBinary("account.pub")
-		if bPublicKey == nil {
-			panic(errors.New("the account.pub file is mandatory"))
-		}
-	
-		validatorConfig.PublicKey = string(bPublicKey)	
-	}else{
-		decodedData, err := base64.StdEncoding.DecodeString(validatorConfig.PublicKey)
-
-		if err != nil {
-			panic(errors.New("connot decode ACCESS_TOKEN_PUBLIC_KEY env with base64 "))
-		}
-
-		validatorConfig.PublicKey = string(decodedData);
 	}
 
 	globals.AccessTokenValidator, err = accesstokens.NewValidator(validatorConfig)
@@ -153,7 +133,6 @@ func ActivateGeoIPService() error {
 	geoip.SetDefaultService(service)
 	return nil
 }
-
 
 func setupGeoIP() {
 	if err := ActivateGeoIPService(); err != nil {
