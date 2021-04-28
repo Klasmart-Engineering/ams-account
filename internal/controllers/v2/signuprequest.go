@@ -23,10 +23,11 @@ import (
 )
 
 type verifyCodeRequestBody struct {
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phoneNr"`
-	Password    string `json:"pw"`
-	Language    string `json:"lang"`
+	Email        string `json:"email"`
+	PhoneNumber  string `json:"phoneNr"`
+	Password     string `json:"pw"`
+	Language     string `json:"lang"`
+	TemplateName string `json:"template,omitempty"`
 }
 
 type verifyCodeResponseBody struct {
@@ -132,15 +133,25 @@ func HandleSignupRequest(c echo.Context) error {
 	verificationLink := accountverificationservice.GetVerificationLinkByToken(token, verificationCode, userLanguage)
 	var message *messages.Message
 	if isUsingEmail {
+		var template messages.MessageTemplate
+
+		if reqBody.TemplateName == "kidsloop" {
+			template = &messagetemplates.EmailVerificationKidsloopTemplate{
+				Code: verificationCode,
+			}
+		} else {
+			template = &messagetemplates.EmailVerificationTemplate{
+				Code: verificationCode,
+				Link: verificationLink,
+			}
+		}
+
 		message = &messages.Message{
 			MessageType: messages.MessageTypeEmail,
 			Priority:    messages.MessagePriorityEmailHigh,
 			Recipient:   userEmail,
 			Language:    userLanguage,
-			Template: &messagetemplates.EmailVerificationTemplate{
-				Code: verificationCode,
-				Link: verificationLink,
-			},
+			Template:    template,
 		}
 	} else {
 		message = &messages.Message{

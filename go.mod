@@ -12,7 +12,7 @@ require (
 	bitbucket.org/calmisland/go-server-geoip v1.0.3
 	bitbucket.org/calmisland/go-server-info v1.1.0
 	bitbucket.org/calmisland/go-server-logs v1.2.2
-	bitbucket.org/calmisland/go-server-messages v1.3.0
+	bitbucket.org/calmisland/go-server-messages v1.3.2
 	bitbucket.org/calmisland/go-server-queues v1.0.2 // indirect
 	bitbucket.org/calmisland/go-server-requests v1.22.0
 	bitbucket.org/calmisland/go-server-security v1.1.2
