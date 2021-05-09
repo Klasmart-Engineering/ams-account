@@ -77,7 +77,7 @@ func HandleResendEmailVerification(c echo.Context) error {
 		Priority:    messages.MessagePriorityEmailHigh,
 		Recipient:   userEmail,
 		Language:    userLanguage,
-		Template: &messagetemplates.EmailVerificationTemplate{
+		Template: &messagetemplates.EmailVerificationLnpTemplate{
 			Code: verificationCode,
 			Link: verificationLink,
 		},

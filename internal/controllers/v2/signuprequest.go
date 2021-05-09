@@ -135,14 +135,14 @@ func HandleSignupRequest(c echo.Context) error {
 	if isUsingEmail {
 		var template messages.MessageTemplate
 
-		if reqBody.TemplateName == "kidsloop" {
-			template = &messagetemplates.EmailVerificationKidsloopTemplate{
+		if reqBody.TemplateName == "learnandplay" {
+			template = &messagetemplates.EmailVerificationLnpTemplate{
 				Code: verificationCode,
+				Link: verificationLink,
 			}
 		} else {
 			template = &messagetemplates.EmailVerificationTemplate{
 				Code: verificationCode,
-				Link: verificationLink,
 			}
 		}
 
