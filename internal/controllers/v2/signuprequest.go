@@ -8,7 +8,6 @@ import (
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/globals"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/helpers"
 	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/account_jwt_service"
-	"bitbucket.org/calmisland/account-lambda-funcs/internal/services/accountverificationservice"
 	"bitbucket.org/calmisland/go-server-logs/logger"
 	"bitbucket.org/calmisland/go-server-messages/messages"
 	"bitbucket.org/calmisland/go-server-messages/messagetemplates"
@@ -130,7 +129,7 @@ func HandleSignupRequest(c echo.Context) error {
 		VerificationCode: verificationCode,
 	})
 
-	verificationLink := accountverificationservice.GetVerificationLinkByToken(token, verificationCode, userLanguage)
+	verificationLink := globals.AccountVerificationService.GetVerificationLinkByToken(token, verificationCode, userLanguage)
 	var message *messages.Message
 	if isUsingEmail {
 		var template messages.MessageTemplate
