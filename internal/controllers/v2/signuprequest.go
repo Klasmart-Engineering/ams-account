@@ -132,18 +132,18 @@ func HandleSignupRequest(c echo.Context) error {
 	verificationLink := globals.AccountVerificationService.GetVerificationLinkByToken(token, verificationCode, userLanguage)
 	var message *messages.Message
 	if isUsingEmail {
-		var template messages.MessageTemplate
+		// var template messages.MessageTemplate
 
-		if reqBody.TemplateName == "learnandplay" {
-			template = &messagetemplates.EmailVerificationLnpTemplate{
-				Code: verificationCode,
-				Link: verificationLink,
-			}
-		} else {
-			template = &messagetemplates.EmailVerificationTemplate{
-				Code: verificationCode,
-			}
+		// if reqBody.TemplateName == "learnandplay" {
+		template := &messagetemplates.EmailVerificationLnpTemplate{
+			Code: verificationCode,
+			Link: verificationLink,
 		}
+		// } else {
+		// 	template = &messagetemplates.EmailVerificationTemplate{
+		// 		Code: verificationCode,
+		// 	}
+		// }
 
 		message = &messages.Message{
 			MessageType: messages.MessageTypeEmail,
