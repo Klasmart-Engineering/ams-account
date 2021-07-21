@@ -53,9 +53,9 @@ func HandleForgotPassword(c echo.Context) error {
 	if len(userEmail) > 0 {
 		// Validate parameters
 		if !emailutils.IsValidEmailAddressFormat(userEmail) {
-			apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailFormat)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailFormat)
 		} else if !emailutils.IsValidEmailAddressHost(userEmail) {
-			apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailHost)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidEmailHost)
 		}
 
 		// There should not be an email and a phone number at the same time
@@ -64,17 +64,17 @@ func HandleForgotPassword(c echo.Context) error {
 	} else if len(userPhoneNumber) > 0 {
 		userPhoneNumber, err = phoneutils.CleanPhoneNumber(userPhoneNumber)
 		if err != nil {
-			apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		} else if !phoneutils.IsValidPhoneNumber(userPhoneNumber) {
 			logger.LogFormat("[FORGETPW] A request to recover from a forgotten password for account [%s] with invalid phone number from IP [%s] UserAgent [%s]\n", userPhoneNumber, clientIP, clientUserAgent)
-			apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
+			return apirequests.EchoSetClientError(c, apierrors.ErrorInputInvalidFormat.WithField("phoneNr"))
 		}
 
 		// There should not be an email and a phone number at the same time
 		userEmail = ""
 		isUsingEmail = false
 	} else {
-		apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
+		return apirequests.EchoSetClientError(c, apierrors.ErrorInvalidParameters.WithField("email"))
 	}
 
 	// Sets the default language if none is set
@@ -105,10 +105,10 @@ func HandleForgotPassword(c echo.Context) error {
 		if err != nil {
 			return helpers.HandleInternalError(c, err)
 		} else if accInfo != nil && !accounts.IsAccountVerified(accInfo.Flags) {
-			apirequests.EchoSetClientError(c, apierrors.ErrorEmailNotVerified)
+			return apirequests.EchoSetClientError(c, apierrors.ErrorEmailNotVerified)
 		}
 	} else {
-		apirequests.EchoSetClientError(c, apierrors.ErrorAccountNotFound)
+		return apirequests.EchoSetClientError(c, apierrors.ErrorAccountNotFound)
 	}
 
 	if accInfo != nil {
