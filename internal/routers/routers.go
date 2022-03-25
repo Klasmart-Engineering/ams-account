@@ -17,7 +17,7 @@ func SetupRouter() *echo.Echo {
 	e := echo.New()
 
 	// Middleware
-	// e.Use(middleware.Logger())
+	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Use(sentryecho.New(sentryecho.Options{}))
@@ -71,6 +71,8 @@ func SetupRouter() *echo.Echo {
 
 	v2.POST("/signup/request", apiControllerV2.HandleSignupRequest)
 	v2.POST("/signup/confirm", apiControllerV2.HandleSignUpConfirm)
+
+	v2.POST("/deletion", apiControllerV2.HandleDeletionAccount, authMiddleware)
 
 	v2.POST("/verify/email", apiControllerV2.HandleVerifyEmail)
 	v2.POST("/kl15/migrate", apiControllerV2.HandleKl15Migration)
