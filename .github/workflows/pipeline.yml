@@ -86,7 +86,7 @@ jobs:
       run: |
         curl -sSL -o ./argocd "https://$ARGOCD_SERVER/download/argocd-linux-amd64"
         chmod 755 ./argocd
-        ./argocd app set ams-account-$GITHUB_REF_NAME --grpc-web -p targetTag=$IMAGE_TAG
+        ./argocd app set ams-account-$GITHUB_REF_NAME --grpc-web -p image.tag=$IMAGE_TAG
 
       env:
         ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
