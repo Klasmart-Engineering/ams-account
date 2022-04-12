@@ -1,0 +1,52 @@
+version: 2.1
+
+orbs:
+  aws-ecr: circleci/aws-ecr@7.2.0  
+  argo-set: payfit/argo-set@0.14.0
+
+jobs:
+  build:
+    working_directory: /home/circleci/app
+    docker:
+      - image: circleci/golang:1.17  
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "69:6d:d4:dc:ef:4c:ed:2e:e7:7c:bc:7f:73:72:2d:e6"
+      - run: git config --global url."git@bitbucket.org:".insteadOf "https://bitbucket.org/"
+      - checkout
+      - run: export GOPRIVATE=bitbucket.org/calmisland
+      - run: make build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  dockerize-and-push-image:
+    working_directory: /home/circleci/app
+    executor:
+      name: aws-ecr/default
+    steps:
+      - aws-ecr/build-and-push-image:
+          repo: ams/account
+          attach-workspace: true
+          checkout: false
+          tag: '${CIRCLE_SHA1:0:7}'
+workflows:
+  main:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - dev
+                - prod      
+      - dockerize-and-push-image:
+          requires:
+            - build
+      - argo-set/set:
+          argoApplication: ams-account-${CIRCLE_BRANCH}
+          argoProject: "ams-${CIRCLE_BRANCH} --grpc-web"
+          authToken: $ARGOCD_AUTH_TOKEN
+          parameters: targetTag=${CIRCLE_SHA1:0:7}
+          requires:
+            - dockerize-and-push-image            
