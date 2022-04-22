@@ -48,7 +48,28 @@ func HandleDeletionAccount(c echo.Context) error {
 		err = tableAccountEmail.Delete("email", resultAccountEmail.Email).Run()
 
 		if err != nil {
-			utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
+			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
+		}
+	}
+
+	transactionTableName := models.GetTableName(models.TABLE_NAME_ACCOUNT_TRANSACTIONS)
+	tableTransaction := db.Table(transactionTableName)
+
+	var resultTransaction []models.AccountTransaction
+	err = tableTransaction.Get("accId", accountID).All(&resultTransaction)
+
+	if err != nil {
+
+		return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
+	}
+
+	for i := 0; i < len(resultTransaction); i++ {
+		transactionItem := resultTransaction[i]
+
+		err = tableTransaction.Delete("accId", accountID).Range("transactionId", transactionItem.TransactionID).Run()
+
+		if err != nil {
+			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 

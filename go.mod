@@ -22,13 +22,13 @@ require (
 	github.com/getsentry/sentry-go v0.9.0
 	github.com/google/uuid v1.1.5
 	github.com/labstack/echo/v4 v4.7.2
-	github.com/pkg/errors v0.9.1
 )
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 )
 
@@ -48,7 +48,7 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/guregu/dynamo v1.14.0
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/labstack/gommon v0.3.1
 	github.com/lestrrat-go/backoff/v2 v2.0.7 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.0 // indirect
