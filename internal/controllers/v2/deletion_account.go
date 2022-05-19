@@ -36,16 +36,35 @@ func HandleDeletionAccount(c echo.Context) error {
 
 	var resultAccountEmail models.AccountEmail
 	tableAccountEmail := db.Table(models.GetTableName(models.TABLE_NAME_ACCOUNT_EMAIL))
-	err = tableAccountEmail.Get("accId", accountID).Index(models.ACCOUNT_GSI_ACCID).One(&resultAccountEmail)
+	err = tableAccountEmail.Get("accId", accountID).Index(models.ACCOUNT_EMAIL_GSI_ACCID).One(&resultAccountEmail)
 
 	if err != nil {
 		if err.Error() == "dynamo: no item found" {
-			return utils.EchoHandleHTTPError(http.StatusNotFound, err)
+			// DO NOTHING
 		} else {
 			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
 		}
 	} else {
 		err = tableAccountEmail.Delete("email", resultAccountEmail.Email).Run()
+
+		if err != nil {
+			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
+		}
+	}
+
+	var resultAccountPhoneNumber models.AccountPhoneNumber
+	accountPhoneNumberTableName := models.GetTableName(models.TABLE_NAME_ACCOUNT_PHONE_NUMBER)
+	tableAccountPhoneNumber := db.Table(accountPhoneNumberTableName)
+	err = tableAccountPhoneNumber.Get("accId", accountID).Index(models.ACCOUNT_PHONENUMBER_GSI_ACCID).One(&resultAccountPhoneNumber)
+
+	if err != nil {
+		if err.Error() == "dynamo: no item found" {
+			// DO NOTHING
+		} else {
+			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
+		}
+	} else {
+		err = tableAccountPhoneNumber.Delete("phoneNr", resultAccountPhoneNumber.PhoneNumber).Run()
 
 		if err != nil {
 			return utils.EchoHandleHTTPError(http.StatusInternalServerError, err)
